@@ -78,6 +78,7 @@ const App: React.FC = () => {
   const dynamicTips = currentItem?.tips || DEFAULT_TIPS;
 
   // Identity Builder State
+  const [configTab, setConfigTab] = useState<'pose' | 'attire' | 'logo'>('pose');
   const [selectedPose, setSelectedPose] = useState<{
     category: PoseCategory;
     variant: PoseVariant;
@@ -118,6 +119,7 @@ const App: React.FC = () => {
     setSelectedEnhancement(null);
     // Reset logo
     setLogoFile(null);
+    setConfigTab('pose');
   };
 
   // Run analysis and update a specific history item
@@ -203,8 +205,15 @@ const App: React.FC = () => {
     // Use selectedFile (from History) as the reference image if it exists
     const referenceImage = mode === AppMode.IDENTITY_BUILDER ? selectedFile : null;
     
+    if (!referenceImage) {
+        setError("Reference image is required for Identity Builder.");
+        return;
+    }
+
     try {
-      const basePrompt = employeePrompt.trim() || "A professional corporate employee";
+      // Pass the raw employeePrompt directly - the service now handles empty strings intelligently
+      // to fallback to reference image identity if available.
+      const basePrompt = employeePrompt.trim(); 
       
       const base64Image = await generateEmployeeImage(
         basePrompt,
@@ -325,162 +334,163 @@ const App: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Left Column: Input */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="prose prose-invert">
-              <h2 className="text-2xl font-light text-white">
-                {mode === AppMode.OFFER_BOOSTER ? 'Enhance Visual Assets' : 'Standardize Identity'}
-              </h2>
-              <p className="text-slate-400">
-                {mode === AppMode.OFFER_BOOSTER 
-                  ? 'Upload hotel or landscape imagery. The system will automatically analyze the image and provide enhancement suggestions.' 
-                  : 'Generate professional employee portraits with customized poses, attire, and logo integration for consistent corporate identity.'}
-              </p>
-            </div>
-
-            {/* IDENTITY BUILDER CONTROLS */}
+          <div className="lg:col-span-5 space-y-4">
+            
+            {/* 1. Action Bar - Top Priority */}
             {mode === AppMode.IDENTITY_BUILDER && (
-               <>
-                 {/* Pose Configuration Card */}
-                 <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-900/10 to-purple-900/10">
-                   <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-700/50">
-                     <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                       <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                       </svg>
-                     </div>
-                     <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider">
-                       Pose Configuration
-                     </h3>
-                   </div>
-                   <PoseSelector
-                     selectedCategory={selectedPose.category}
-                     selectedVariant={selectedPose.variant}
-                     onPoseChange={(cat, variant) => setSelectedPose({ category: cat, variant })}
-                     disabled={isLoading}
-                   />
-                 </Card>
+                <div className="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl border border-indigo-500/30 shadow-lg sticky top-20 z-40">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                            <h2 className="text-lg font-semibold text-white">Identity Builder</h2>
+                            <p className="text-xs text-slate-400">Generate standardized portrait from reference</p>
+                        </div>
+                        <Button 
+                            onClick={handleGenerateEmployee} 
+                            disabled={isLoading || !selectedFile}
+                            isLoading={isLoading}
+                            size="md"
+                            className={`min-w-[160px] ${!selectedFile ? 'opacity-50' : 'animate-pulse-subtle'}`}
+                        >
+                            {isLoading ? 'Processing...' : 'Generate Portrait'}
+                        </Button>
+                    </div>
+                    {!selectedFile && (
+                        <div className="mt-2 text-xs text-amber-400 font-medium bg-amber-900/20 px-3 py-1.5 rounded border border-amber-900/50 flex items-center gap-2">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Reference image required
+                        </div>
+                    )}
+                </div>
+            )}
 
-                 {/* Attire & Logo Style Card */}
-                 <Card className="border-purple-500/30 bg-gradient-to-br from-purple-900/10 to-pink-900/10">
-                   <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-700/50">
-                     <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                       <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                       </svg>
-                     </div>
-                     <h3 className="text-sm font-semibold text-purple-300 uppercase tracking-wider">
-                       Attire & Logo Style
-                     </h3>
-                   </div>
-                   <AttireSelector
-                     selected={selectedAttire}
-                     onAttireChange={setSelectedAttire}
-                     disabled={isLoading}
-                   />
-                 </Card>
+            {/* 2. Mandatory Upload */}
+            <Card 
+                title={mode === AppMode.IDENTITY_BUILDER ? "Reference Person (Mandatory)" : "Upload Source"}
+                className={mode === AppMode.IDENTITY_BUILDER && !selectedFile ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)]" : ""}
+            >
+               <ImageUpload onFileSelect={handleFileSelect} isLoading={isLoading} />
+               {mode === AppMode.IDENTITY_BUILDER && (
+                   <p className="text-xs text-slate-500 mt-2 text-center">
+                       Upload a clear photo of the employee to preserve their identity.
+                   </p>
+               )}
+            </Card>
 
-                 {/* Logo Upload Card */}
-                 <Card className="border-pink-500/30 bg-gradient-to-br from-pink-900/10 to-rose-900/10">
-                   <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-700/50">
-                     <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center">
-                       <svg className="w-5 h-5 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                       </svg>
-                     </div>
-                     <h3 className="text-sm font-semibold text-pink-300 uppercase tracking-wider">
-                       Company Logo (Optional)
-                     </h3>
-                   </div>
-                   <div className="space-y-3">
-                     <div className="relative">
-                       <input
-                         type="file"
-                         accept="image/*"
-                         onChange={(e) => {
-                           const file = e.target.files?.[0];
-                           if (file) setLogoFile(file);
-                         }}
-                         disabled={isLoading}
-                         className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-pink-500/20 file:text-pink-300 hover:file:bg-pink-500/30 file:cursor-pointer cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                       />
-                     </div>
-                     {logoFile && (
-                       <div className="flex items-center gap-3 p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
-                         <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden">
-                           <img 
-                             src={URL.createObjectURL(logoFile)} 
-                             alt="Logo preview" 
-                             className="w-full h-full object-contain"
-                           />
-                         </div>
-                         <div className="flex-1 min-w-0">
-                           <div className="text-sm font-medium text-white truncate">
-                             {logoFile.name}
-                           </div>
-                           <div className="text-xs text-slate-500">
-                             {(logoFile.size / 1024).toFixed(1)} KB
-                           </div>
-                         </div>
-                         <button
-                           onClick={() => setLogoFile(null)}
-                           disabled={isLoading}
-                           className="p-2 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
-                         >
-                           <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                           </svg>
-                         </button>
-                       </div>
+            {/* IDENTITY BUILDER CONFIGURATION TABS */}
+            {mode === AppMode.IDENTITY_BUILDER && (
+               <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
+                 {/* Tabs Header */}
+                 <div className="flex border-b border-slate-700">
+                    <button 
+                        onClick={() => setConfigTab('pose')}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${configTab === 'pose' ? 'border-indigo-500 text-white bg-slate-800' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                    >
+                        Pose
+                    </button>
+                    <button 
+                        onClick={() => setConfigTab('attire')}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${configTab === 'attire' ? 'border-purple-500 text-white bg-slate-800' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                    >
+                        Attire
+                    </button>
+                    <button 
+                        onClick={() => setConfigTab('logo')}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${configTab === 'logo' ? 'border-pink-500 text-white bg-slate-800' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                    >
+                        Logo
+                    </button>
+                 </div>
+
+                 {/* Tab Content */}
+                 <div className="p-4 bg-slate-900/30">
+                     {configTab === 'pose' && (
+                        <div className="animate-fade-in">
+                             <PoseSelector
+                                selectedCategory={selectedPose.category}
+                                selectedVariant={selectedPose.variant}
+                                onPoseChange={(cat, variant) => setSelectedPose({ category: cat, variant })}
+                                disabled={isLoading}
+                             />
+                        </div>
                      )}
-                     <div className="text-xs text-slate-500 flex items-start gap-2">
-                       <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                       </svg>
-                       <span>Logo will be integrated using the selected attire's application method (embroidery, print, pin, or patch)</span>
-                     </div>
-                   </div>
-                 </Card>
 
-                 {/* Generative Prompt Card */}
-                 <Card className="border-indigo-500/30 bg-indigo-900/10">
-                   <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-700/50">
-                     <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                       <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                       </svg>
-                     </div>
-                     <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider">
-                       Employee Description
-                     </h3>
-                   </div>
-                   <div className="space-y-3">
-                     <textarea 
-                       className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition-all resize-none"
-                       rows={4}
-                       placeholder="Describe the employee (e.g., 'Professional woman in her 30s with short brown hair, wearing business attire, confident smile, modern office setting')"
+                     {configTab === 'attire' && (
+                        <div className="animate-fade-in">
+                            <AttireSelector
+                                selected={selectedAttire}
+                                onAttireChange={setSelectedAttire}
+                                disabled={isLoading}
+                            />
+                        </div>
+                     )}
+
+                     {configTab === 'logo' && (
+                        <div className="animate-fade-in space-y-4">
+                            <div className="p-4 bg-pink-900/10 border border-pink-500/20 rounded-lg">
+                                <h4 className="text-sm font-medium text-pink-300 mb-2">Company Branding</h4>
+                                <div className="relative">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) setLogoFile(file);
+                                        }}
+                                        disabled={isLoading}
+                                        className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-pink-500/20 file:text-pink-300 hover:file:bg-pink-500/30 file:cursor-pointer cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {logoFile ? (
+                                <div className="flex items-center gap-3 p-3 bg-slate-800 border border-slate-700 rounded-lg">
+                                    <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden border border-slate-700">
+                                        <img 
+                                            src={URL.createObjectURL(logoFile)} 
+                                            alt="Logo preview" 
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium text-white truncate">{logoFile.name}</div>
+                                        <div className="text-xs text-slate-500">Ready for integration</div>
+                                    </div>
+                                    <button onClick={() => setLogoFile(null)} className="text-slate-400 hover:text-white">✕</button>
+                                </div>
+                            ) : (
+                                <div className="text-xs text-slate-500 text-center py-4 border-2 border-dashed border-slate-800 rounded-lg">
+                                    No logo selected. Standard attire will be generated.
+                                </div>
+                            )}
+                        </div>
+                     )}
+                 </div>
+               </div>
+            )}
+
+            {/* Optional Description (Collapsed or Minimal) */}
+            {mode === AppMode.IDENTITY_BUILDER && (
+                <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <h3 className="text-sm font-medium text-slate-300">Additional Details (Optional)</h3>
+                    </div>
+                    <textarea 
+                       className="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all resize-none"
+                       rows={2}
+                       placeholder="E.g. 'Add glasses', 'Make lighting warmer'..."
                        value={employeePrompt}
                        onChange={(e) => setEmployeePrompt(e.target.value)}
                        disabled={isLoading}
                      />
-                     <Button 
-                       onClick={handleGenerateEmployee} 
-                       disabled={isLoading}
-                       isLoading={isLoading}
-                       className="w-full"
-                       size="lg"
-                     >
-                       {isLoading ? 'Generating Portrait...' : 'Generate Professional Portrait'}
-                     </Button>
-                     <div className="flex items-center gap-2 text-xs text-slate-500 justify-center">
-                       <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                       Powered by Gemini 2.5 Flash Image
-                     </div>
-                   </div>
-                 </Card>
-               </>
+                </div>
             )}
 
-            {/* OFFER BOOSTER CONTROLS */}
+            {/* OFFER BOOSTER CONTROLS (Existing logic kept simpler) */}
             {mode === AppMode.OFFER_BOOSTER && selectedFile && (
                <div className="space-y-4">
                  <Card className="border-indigo-500/30 bg-indigo-900/10">
@@ -566,10 +576,6 @@ const App: React.FC = () => {
                </div>
             )}
 
-            <Card title={mode === AppMode.IDENTITY_BUILDER ? "Reference Person (Optional)" : "Upload Source"}>
-               <ImageUpload onFileSelect={handleFileSelect} isLoading={isLoading} />
-            </Card>
-
             {error && (
               <div className="p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-300 text-sm">
                 {error}
@@ -581,11 +587,11 @@ const App: React.FC = () => {
           <div className="lg:col-span-7 space-y-6">
             {previewUrl ? (
               <div className="space-y-6">
-                <div className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-800">
+                <div className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-2xl">
                   <img 
                     src={isComparing && originalPreviewUrl ? originalPreviewUrl : previewUrl} 
                     alt="Preview" 
-                    className="w-full h-auto max-h-[500px] object-contain mx-auto transition-all duration-200"
+                    className="w-full h-auto max-h-[600px] object-contain mx-auto transition-all duration-200"
                   />
                   
                   {/* Status Badge */}

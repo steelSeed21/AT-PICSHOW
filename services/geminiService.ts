@@ -388,8 +388,8 @@ Output should be clean and professional, suitable for corporate use.
 
 export async function generateEmployeeImage(
   prompt: string,
-  logoFile?: File | null,
-  referenceImage?: File | null,
+  logoFile: File | null | undefined,
+  referenceImage: File | null | undefined,
   attire: AttireType = AttireType.SUIT,
   pose: { category: PoseCategory; variant: PoseVariant } = { 
     category: PoseCategory.NEUTRAL, 
@@ -397,11 +397,21 @@ export async function generateEmployeeImage(
   }
 ): Promise<string> {
   
+  if (!referenceImage) {
+      throw new Error("Reference Image is REQUIRED. You must upload a photo of the person to preserve their identity.");
+  }
+
   const ai = getAIClient();
   const parts: any[] = [];
   
   // Get logo placement configuration for selected attire
   const logoPlacement = ATTIRE_LOGO_MAPPING[attire];
+
+  // Determine effective prompt
+  let effectivePrompt = prompt;
+  if (!effectivePrompt || effectivePrompt.trim() === '') {
+     effectivePrompt = "The exact person depicted in the reference image, maintaining their exact grooming and features.";
+  }
   
   // Build comprehensive prompt
   let fullPrompt = `
@@ -410,7 +420,7 @@ export async function generateEmployeeImage(
 ╚════════════════════════════════════════════════════════════════════╝
 
 BASE DESCRIPTION:
-${prompt}
+${effectivePrompt}
 
 ${buildPosePrompt(pose)}
 
@@ -424,31 +434,38 @@ ${buildAttireSpecification(attire)}
     fullPrompt += `\n${buildLogoPhysicalityPrompt(attire, logoPlacement)}`;
   }
 
-  // Add reference image guidance if provided
-  if (referenceImage) {
-    const referencePart = await fileToGenerativePart(referenceImage);
-    parts.push(referencePart);
+  // Add reference image (MANDATORY)
+  const referencePart = await fileToGenerativePart(referenceImage);
+  parts.push(referencePart);
 
-    fullPrompt += `
+  fullPrompt += `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-REFERENCE PHOTO GUIDANCE
+REFERENCE PHOTO GUIDANCE - STRICT IDENTITY & GROOMING COPY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STRICT IDENTITY PRESERVATION:
-You must generate an image of the PERSON from the reference photo.
-Do NOT change their facial features.
+PRIMARY DIRECTIVE:
+You are to generate a portrait of the SPECIFIC INDIVIDUAL shown in the reference image.
+You must transport this exact person into the new pose and attire defined above.
 
-CRITICAL FACIAL DETAILS:
-- FACIAL HAIR: Check the reference photo carefully.
-  - If the person is clean-shaven, the result MUST BE clean-shaven.
-  - DO NOT add a mustache or beard if none exists.
-  - DO NOT remove facial hair if it exists.
-- FACE STRUCTURE: Keep the exact nose, eyes, mouth, and jawline.
-- SKIN TONE & AGE: Maintain exactly as reference.
+CRITICAL GROOMING & FEATURES CHECKLIST:
+1.  **FACIAL HAIR / GROOMING**:
+    *   Look at the reference face immediately.
+    *   Is the person clean-shaven? -> **OUTPUT MUST BE CLEAN-SHAVEN.**
+    *   Does the person have a specific beard style? -> **OUTPUT MUST MATCH EXACTLY.**
+    *   **DO NOT** add a mustache or beard if the reference face is smooth.
+    *   **DO NOT** make the person look "older" or "more corporate" by adding facial hair.
 
-The goal is to make it look like the SAME person in a new outfit/pose.
+2.  **FACIAL STRUCTURE**:
+    *   Maintain exact eye shape, nose shape, and jawline.
+    *   Maintain skin tone and texture age.
+
+3.  **HAIR**:
+    *   Match the hair color, texture, and general style/length from reference.
+
+CONTRADICTION HANDLING:
+If the "Corporate Employee" context implies a beard but the Reference Image is clean-shaven, **OBEY THE REFERENCE IMAGE**.
+The Reference Image is the source of truth for the person's physical appearance.
     `;
-  }
 
   // Add technical photography requirements
   fullPrompt += `
@@ -498,6 +515,7 @@ Before finalizing the image, verify:
 ☑ Pose matches specified configuration exactly
 ☑ Attire is appropriate and well-fitted
 ☑ Logo integration is photorealistic (if applicable)
+☑ GROOMING MATCHES REFERENCE (Check facial hair again!)
 ☑ Lighting is professional and flattering
 ☑ Background is appropriately blurred
 ☑ Overall image looks like professional studio photography
