@@ -1,5 +1,6 @@
 import React from 'react';
-import { PoseCategory, PoseVariant, POSE_VARIANTS } from '../types';
+import { PoseCategory, PoseVariant } from '../types';
+import { POSE_VARIANTS } from '../constants';
 
 interface PoseSelectorProps {
   selectedCategory: PoseCategory;

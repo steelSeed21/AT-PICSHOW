@@ -1,5 +1,6 @@
 import React from 'react';
-import { AttireType, ATTIRE_LOGO_MAPPING, getAttireDisplayName, getLogoTechniqueDisplayName } from '../types';
+import { AttireType, LogoTechnique } from '../types';
+import { ATTIRE_LOGO_MAPPING } from '../constants';
 
 interface AttireSelectorProps {
   selected: AttireType;
@@ -22,6 +23,29 @@ const ATTIRE_DESCRIPTIONS: Record<AttireType, string> = {
   [AttireType.TSHIRT]: 'Casual t-shirt',
   [AttireType.JACKET]: 'Casual or technical jacket'
 };
+
+// Helper functions (moved local to component as they are UI helpers)
+function getAttireDisplayName(attire: AttireType): string {
+  const names: Record<AttireType, string> = {
+    [AttireType.SUIT]: 'Business Suit',
+    [AttireType.SHIRT]: 'Dress Shirt',
+    [AttireType.POLO]: 'Polo Shirt',
+    [AttireType.TSHIRT]: 'T-Shirt',
+    [AttireType.JACKET]: 'Jacket'
+  };
+  return names[attire];
+}
+
+function getLogoTechniqueDisplayName(technique: LogoTechnique): string {
+  const names: Record<LogoTechnique, string> = {
+    [LogoTechnique.EMBROIDERED_PIN]: 'Metal Pin',
+    [LogoTechnique.CHEST_EMBROIDERY]: 'Embroidered',
+    [LogoTechnique.SCREEN_PRINT]: 'Screen Print',
+    [LogoTechnique.WOVEN_PATCH]: 'Woven Patch',
+    [LogoTechnique.ENGRAVED_BADGE]: 'Engraved Badge'
+  };
+  return names[technique];
+}
 
 export const AttireSelector: React.FC<AttireSelectorProps> = ({
   selected,
@@ -140,7 +164,7 @@ export const AttireSelector: React.FC<AttireSelectorProps> = ({
         </div>
       </div>
 
-      {/* Technical Details Accordion (Optional - can be expanded) */}
+      {/* Technical Details Accordion */}
       <details className="group">
         <summary className="cursor-pointer text-xs font-medium text-slate-400 hover:text-slate-300 transition-colors flex items-center gap-2 select-none">
           <svg className="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
