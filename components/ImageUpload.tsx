@@ -25,6 +25,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onFileSelect, isLoadin
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       onFileSelect(e.target.files[0]);
+      // Reset value to allow selecting the same file again if needed
+      e.target.value = '';
+    }
+  };
+
+  const handleContainerClick = () => {
+    if (!isLoading && fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -32,14 +40,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onFileSelect, isLoadin
     <div
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center bg-slate-800/20 hover:bg-slate-800/40 transition-colors cursor-pointer"
-      onClick={() => fileInputRef.current?.click()}
+      className={`border-2 border-dashed border-slate-600 rounded-xl p-8 text-center bg-slate-800/20 transition-colors ${
+        isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-800/40 cursor-pointer'
+      }`}
+      onClick={handleContainerClick}
     >
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*"
+        accept="image/png, image/jpeg, image/jpg, image/webp, image/heic, image/heif, .png, .jpg, .jpeg, .webp, .heic, .heif"
         className="hidden"
         disabled={isLoading}
       />
@@ -51,7 +61,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onFileSelect, isLoadin
         </div>
         <div>
           <p className="text-lg font-medium text-slate-200">Drop image here or click to upload</p>
-          <p className="text-sm text-slate-400 mt-1">Supports JPG, PNG, WEBP (Max 10MB)</p>
+          <p className="text-sm text-slate-400 mt-1">Supports JPG, PNG, WEBP, HEIC</p>
         </div>
       </div>
     </div>

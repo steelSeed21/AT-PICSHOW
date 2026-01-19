@@ -13,6 +13,38 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result }
         <p className="text-slate-300 leading-relaxed text-lg">{result.analysis}</p>
       </Card>
 
+      {/* Identity Builder Specific Fields - Only show if present */}
+      {(result.pose_preset || result.clothing_type) && (
+        <Card title="Identity Standardization Metrics">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {result.pose_preset && (
+              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <span className="text-xs text-slate-400 uppercase tracking-wider block mb-1">Pose Preset</span>
+                <span className="text-indigo-300 font-mono font-medium">{result.pose_preset}</span>
+              </div>
+            )}
+            {result.clothing_type && (
+              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <span className="text-xs text-slate-400 uppercase tracking-wider block mb-1">Clothing Type</span>
+                <span className="text-indigo-300 font-mono font-medium">{result.clothing_type}</span>
+              </div>
+            )}
+            {result.brand_application && (
+              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <span className="text-xs text-slate-400 uppercase tracking-wider block mb-1">Brand Application</span>
+                <span className="text-indigo-300 font-mono font-medium">{result.brand_application}</span>
+              </div>
+            )}
+            {result.logo_placement && (
+              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <span className="text-xs text-slate-400 uppercase tracking-wider block mb-1">Logo Placement</span>
+                <span className="text-indigo-300 font-mono font-medium">{result.logo_placement}</span>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card title="Detected Attributes">
           <div className="space-y-4">

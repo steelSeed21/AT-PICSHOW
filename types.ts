@@ -5,6 +5,360 @@ export enum AppMode {
   IDENTITY_BUILDER = 'IDENTITY_BUILDER'
 }
 
+// ============================================================================
+// POSE SYSTEM - 3 Variants per Category
+// ============================================================================
+
+export enum PoseCategory {
+  NEUTRAL = 'neutral',
+  POWER = 'power',
+  RELAXED = 'relaxed',
+  ANGLE = 'angle',
+  CASUAL = 'casual'
+}
+
+export enum PoseVariant {
+  A = 'A',
+  B = 'B',
+  C = 'C'
+}
+
+export interface PoseConfig {
+  category: PoseCategory;
+  variant: PoseVariant;
+  name: string;
+  description: string;
+  handPosition: string;
+  bodyAngle: string;
+  expression: string;
+  icon: string;
+}
+
+export const POSE_VARIANTS: Record<PoseCategory, Record<PoseVariant, PoseConfig>> = {
+  [PoseCategory.NEUTRAL]: {
+    [PoseVariant.A]: {
+      category: PoseCategory.NEUTRAL,
+      variant: PoseVariant.A,
+      name: "Classic Corporate",
+      description: "Traditional professional headshot",
+      handPosition: "Arms at sides, natural relaxed position",
+      bodyAngle: "Straight-on, 0° rotation, centered",
+      expression: "Neutral professional smile, approachable",
+      icon: "👔"
+    },
+    [PoseVariant.B]: {
+      category: PoseCategory.NEUTRAL,
+      variant: PoseVariant.B,
+      name: "Approachable",
+      description: "Warm corporate presence",
+      handPosition: "Hands clasped in front at waist level",
+      bodyAngle: "Slight 5° left rotation, open stance",
+      expression: "Warm welcoming smile, friendly demeanor",
+      icon: "🤝"
+    },
+    [PoseVariant.C]: {
+      category: PoseCategory.NEUTRAL,
+      variant: PoseVariant.C,
+      name: "Executive",
+      description: "Senior leadership style",
+      handPosition: "One hand in pocket, other relaxed at side",
+      bodyAngle: "Subtle 10° right rotation, confident",
+      expression: "Calm confident demeanor, slight smile",
+      icon: "💼"
+    }
+  },
+  
+  [PoseCategory.POWER]: {
+    [PoseVariant.A]: {
+      category: PoseCategory.POWER,
+      variant: PoseVariant.A,
+      name: "Authority",
+      description: "Confident leadership stance",
+      handPosition: "Arms crossed over chest, strong posture",
+      bodyAngle: "Direct forward facing, commanding presence",
+      expression: "Strong decisive gaze, serious confidence",
+      icon: "💪"
+    },
+    [PoseVariant.B]: {
+      category: PoseCategory.POWER,
+      variant: PoseVariant.B,
+      name: "Confidence",
+      description: "Dynamic assertive pose",
+      handPosition: "Hands on hips, elbows out to sides",
+      bodyAngle: "Slight 15° angle, dynamic positioning",
+      expression: "Assertive energetic expression",
+      icon: "⚡"
+    },
+    [PoseVariant.C]: {
+      category: PoseCategory.POWER,
+      variant: PoseVariant.C,
+      name: "Visionary",
+      description: "Action-oriented visionary",
+      handPosition: "One arm extended forward, pointing or gesturing",
+      bodyAngle: "20° turn, forward-leaning action stance",
+      expression: "Inspirational driven look, focused",
+      icon: "🎯"
+    }
+  },
+
+  [PoseCategory.RELAXED]: {
+    [PoseVariant.A]: {
+      category: PoseCategory.RELAXED,
+      variant: PoseVariant.A,
+      name: "Leaning",
+      description: "Comfortable approachable style",
+      handPosition: "Leaning on surface, one hand supporting body weight",
+      bodyAngle: "30° lean to side, comfortable relaxed",
+      expression: "Easy-going friendly smile, relaxed",
+      icon: "😊"
+    },
+    [PoseVariant.B]: {
+      category: PoseCategory.RELAXED,
+      variant: PoseVariant.B,
+      name: "Seated",
+      description: "Conversational ease",
+      handPosition: "Hands resting on lap or chair armrest",
+      bodyAngle: "Reclined 20° back, at ease in chair",
+      expression: "Open conversational demeanor, genuine",
+      icon: "🪑"
+    },
+    [PoseVariant.C]: {
+      category: PoseCategory.RELAXED,
+      variant: PoseVariant.C,
+      name: "Standing Ease",
+      description: "Natural relaxed standing",
+      handPosition: "Thumbs in pockets, fingers visible outside",
+      bodyAngle: "Weight on one leg, hip slightly cocked",
+      expression: "Approachable genuine smile, authentic",
+      icon: "🧘"
+    }
+  },
+
+  [PoseCategory.ANGLE]: {
+    [PoseVariant.A]: {
+      category: PoseCategory.ANGLE,
+      variant: PoseVariant.A,
+      name: "Profile Power",
+      description: "Classic profile strength",
+      handPosition: "Arms at sides, hands visible in frame",
+      bodyAngle: "45° turn showing strong profile view",
+      expression: "Focused determined look, strong jawline",
+      icon: "📐"
+    },
+    [PoseVariant.B]: {
+      category: PoseCategory.ANGLE,
+      variant: PoseVariant.B,
+      name: "Over-Shoulder",
+      description: "Engaging look-back pose",
+      handPosition: "One hand adjusting jacket collar or lapel",
+      bodyAngle: "60° turn, looking back over shoulder",
+      expression: "Engaging intriguing expression, eye contact",
+      icon: "👁️"
+    },
+    [PoseVariant.C]: {
+      category: PoseCategory.ANGLE,
+      variant: PoseVariant.C,
+      name: "Dynamic Turn",
+      description: "Active communication pose",
+      handPosition: "One hand in motion, mid-gesture naturally",
+      bodyAngle: "70° rotation, captured mid-movement",
+      expression: "Active communicative, speaking energy",
+      icon: "🗣️"
+    }
+  },
+
+  [PoseCategory.CASUAL]: {
+    [PoseVariant.A]: {
+      category: PoseCategory.CASUAL,
+      variant: PoseVariant.A,
+      name: "Coffee Break",
+      description: "Relatable everyday moment",
+      handPosition: "Holding coffee cup or mug casually",
+      bodyAngle: "Slight forward lean, informal stance",
+      expression: "Relaxed personable smile, authentic",
+      icon: "☕"
+    },
+    [PoseVariant.B]: {
+      category: PoseCategory.CASUAL,
+      variant: PoseVariant.B,
+      name: "Thinking",
+      description: "Thoughtful professional",
+      handPosition: "Hand on chin or temple, contemplative gesture",
+      bodyAngle: "15° head tilt, thoughtful positioning",
+      expression: "Intelligent reflective look, considering",
+      icon: "🤔"
+    },
+    [PoseVariant.C]: {
+      category: PoseCategory.CASUAL,
+      variant: PoseVariant.C,
+      name: "Collaborative",
+      description: "Team-oriented openness",
+      handPosition: "Arms open in welcoming gesture, palms visible",
+      bodyAngle: "Forward lean, engaging with viewer",
+      expression: "Team-oriented inclusive smile, warm",
+      icon: "🤗"
+    }
+  }
+};
+
+// ============================================================================
+// ATTIRE & LOGO INTEGRATION SYSTEM
+// ============================================================================
+
+export enum AttireType {
+  SUIT = 'suit',
+  SHIRT = 'shirt',
+  POLO = 'polo',
+  TSHIRT = 'tshirt',
+  JACKET = 'jacket'
+}
+
+export enum LogoTechnique {
+  EMBROIDERED_PIN = 'embroidered_pin',
+  CHEST_EMBROIDERY = 'chest_embroidery',
+  SCREEN_PRINT = 'screen_print',
+  WOVEN_PATCH = 'woven_patch',
+  ENGRAVED_BADGE = 'engraved_badge'
+}
+
+export interface LogoPlacement {
+  technique: LogoTechnique;
+  position: string;
+  size: string;
+  material: string;
+  physicalityRules: string;
+  lightingBehavior: string;
+}
+
+export const ATTIRE_LOGO_MAPPING: Record<AttireType, LogoPlacement> = {
+  
+  [AttireType.SUIT]: {
+    technique: LogoTechnique.EMBROIDERED_PIN,
+    position: "Left lapel, 3cm below notch point",
+    size: "15mm diameter circular pin, subtle professional",
+    material: "Brushed metal pin with enamel inlay, secured with butterfly clasp on reverse",
+    physicalityRules: `
+CRITICAL RENDERING REQUIREMENTS:
+- Metal surface with subtle brushed texture (NOT mirror polish)
+- Slight protrusion 1-2mm from fabric surface creating visible shadow
+- Pin casts soft shadow on lapel fabric beneath
+- Enamel areas show glass-like smooth finish with depth
+- Metal edges catch environmental light highlights
+- Butterfly clasp slightly visible from side viewing angles
+- Pin sits at natural angle following lapel curve
+- Metal shows micro-scratches appropriate for worn business accessory
+    `,
+    lightingBehavior: "Anisotropic specular highlights on brushed metal rim, diffuse reflection on enamel center"
+  },
+
+  [AttireType.SHIRT]: {
+    technique: LogoTechnique.EMBROIDERED_PIN,
+    position: "Left chest pocket area, centered 2cm above pocket edge",
+    size: "18mm diameter pin, professional visibility",
+    material: "Matte finish metal pin with silk-screened logo design, magnetic or clip clasp",
+    physicalityRules: `
+CRITICAL RENDERING REQUIREMENTS:
+- Matte metallic finish (NO mirror reflections or shine)
+- Pin sits nearly flat against shirt with minimal shadow (0.5mm)
+- Logo design etched or screen-printed directly on metal surface
+- Slight depth variation in engraved text/design areas
+- Edges show appropriate wear patina (not brand new)
+- Pin follows shirt fabric plane without major protrusion
+- Magnetic clasp creates slight fabric dimple on reverse side
+- Metal surface shows fingerprint smudges if touched (realistic wear)
+    `,
+    lightingBehavior: "Soft diffuse specular on matte metal surface, no harsh mirror reflections"
+  },
+
+  [AttireType.POLO]: {
+    technique: LogoTechnique.CHEST_EMBROIDERY,
+    position: "Left chest, 8cm below collar point, centered on chest area",
+    size: "40mm width logo, classic polo embroidery sizing",
+    material: "Direct thread embroidery on pique cotton knit fabric using polyester embroidery thread",
+    physicalityRules: `
+CRITICAL RENDERING REQUIREMENTS:
+- Individual thread stitches MUST be clearly visible at close inspection
+- Embroidery raises 1-1.5mm above fabric baseline surface
+- Thread pattern follows logo design curves and details precisely
+- Pique texture (waffle pattern) visible through embroidery gaps
+- Stitches follow fabric weave direction creating slight bias
+- Subtle fabric puckering around densely stitched areas (normal)
+- Thread exhibits directional sheen varying with viewing angle
+- Stitch density varies (denser in solid areas, lighter in details)
+- Loose thread ends NOT visible (clean professional finish)
+- Logo curves and folds with fabric when body moves
+    `,
+    lightingBehavior: "Anisotropic specular reflection on embroidery thread (directional shine like silk), matte on base fabric"
+  },
+
+  [AttireType.TSHIRT]: {
+    technique: LogoTechnique.SCREEN_PRINT,
+    position: "Center chest, 10cm below neckline seam, centered on torso",
+    size: "80mm width, bold statement sizing for casual wear",
+    material: "Plastisol ink screen-printed on 100% cotton jersey knit fabric",
+    physicalityRules: `
+CRITICAL RENDERING REQUIREMENTS:
+- Completely FLAT surface with NO raised embroidery threads
+- Ink sits ON TOP of fabric (not woven into fibers)
+- Slight ink layer thickness 0.1-0.2mm creating subtle edge
+- MATTE finish on ink (avoid any glossy or shiny appearance)
+- Fabric jersey texture visible in unprinted areas and through thin ink
+- Micro-cracks in ink visible if shirt is worn/stretched (realistic aging)
+- Print edges are SHARP and clean (not fuzzy or bleeding)
+- Ink color is opaque and solid (not translucent)
+- Print follows t-shirt fabric stretching and draping naturally
+- NO shadows cast by print (it's flat on surface)
+    `,
+    lightingBehavior: "Uniform matte diffuse reflection, absolutely NO thread highlights or specular shine"
+  },
+
+  [AttireType.JACKET]: {
+    technique: LogoTechnique.WOVEN_PATCH,
+    position: "Left chest OR right sleeve upper arm (specify in prompt), positioned prominently",
+    size: "60mm diameter circular or shield-shaped patch, tactical/outdoor style",
+    material: "Woven polyester thread patch with merrowed edge stitching, hook-and-loop (velcro) backed",
+    physicalityRules: `
+CRITICAL RENDERING REQUIREMENTS:
+- Patch sits raised 2-3mm above jacket surface creating clear shadow
+- Merrowed edge (overlock stitching) clearly visible around perimeter
+- Woven threads create logo image (NOT printed on fabric)
+- Patch follows body contour with subtle curve (not flat sticker)
+- Hook-and-loop backing texture visible at patch edges
+- Shadow cast by raised patch on jacket fabric beneath
+- Edge stitching uses contrasting thread color for definition
+- Patch shows slight texture variation from weaving process
+- Logo design formed by thread density variations (tight weave vs loose)
+- Patch corners slightly curl up from jacket surface (realistic)
+- Velcro grip creates slight fabric dimpling around patch
+    `,
+    lightingBehavior: "Matte diffuse on patch surface with subtle woven texture, soft shadow underneath patch"
+  }
+};
+
+// Helper function to get attire display name
+export function getAttireDisplayName(attire: AttireType): string {
+  const names: Record<AttireType, string> = {
+    [AttireType.SUIT]: 'Business Suit',
+    [AttireType.SHIRT]: 'Dress Shirt',
+    [AttireType.POLO]: 'Polo Shirt',
+    [AttireType.TSHIRT]: 'T-Shirt',
+    [AttireType.JACKET]: 'Jacket'
+  };
+  return names[attire];
+}
+
+// Helper function to get logo technique display name
+export function getLogoTechniqueDisplayName(technique: LogoTechnique): string {
+  const names: Record<LogoTechnique, string> = {
+    [LogoTechnique.EMBROIDERED_PIN]: 'Metal Pin',
+    [LogoTechnique.CHEST_EMBROIDERY]: 'Embroidered',
+    [LogoTechnique.SCREEN_PRINT]: 'Screen Print',
+    [LogoTechnique.WOVEN_PATCH]: 'Woven Patch',
+    [LogoTechnique.ENGRAVED_BADGE]: 'Engraved Badge'
+  };
+  return names[technique];
+}
+
 export interface DetectedAttributes {
   product_state: string | null;
   expiration_date: string | null;
@@ -21,8 +375,13 @@ export interface VisualSuggestion {
 
 export interface VisualAnalysisResult {
   analysis: string;
+  pose_preset?: string | null;
+  clothing_type?: string | null;
+  brand_application?: "ENAMEL_PIN" | "WOVEN_PATCH" | "DIRECT_PRINT" | null;
+  logo_placement?: string | null;
   detected_attributes: DetectedAttributes;
   visual_suggestions: VisualSuggestion[];
+  quick_edit_suggestions: string[];
   constraints_respected: boolean;
 }
 
@@ -31,13 +390,17 @@ export const AnalysisSchema: Schema = {
   type: Type.OBJECT,
   properties: {
     analysis: { type: Type.STRING },
+    pose_preset: { type: Type.STRING, nullable: true },
+    clothing_type: { type: Type.STRING, nullable: true },
+    brand_application: { type: Type.STRING, enum: ["ENAMEL_PIN", "WOVEN_PATCH", "DIRECT_PRINT"], nullable: true },
+    logo_placement: { type: Type.STRING, nullable: true },
     detected_attributes: {
       type: Type.OBJECT,
       properties: {
         product_state: { type: Type.STRING, nullable: true },
         expiration_date: { type: Type.STRING, nullable: true },
         size: { type: Type.STRING, enum: ["SMALL", "LARGE", "UNKNOWN"] },
-        is_opened: { type: Type.STRING, enum: ["true", "false", "unknown"] }, // API schema enum limitation, mapped manually
+        is_opened: { type: Type.STRING, enum: ["true", "false", "unknown"] },
         content_level_percent: { type: Type.NUMBER, nullable: true }
       },
       required: ["size", "is_opened"]
@@ -54,45 +417,47 @@ export const AnalysisSchema: Schema = {
         required: ["type", "description", "risk_level"]
       }
     },
+    quick_edit_suggestions: {
+      type: Type.ARRAY,
+      description: "List of 5-6 short, actionable 2-4 word phrases to improve this specific image (e.g., 'Fix white balance', 'Remove glare').",
+      items: { type: Type.STRING }
+    },
     constraints_respected: { type: Type.BOOLEAN }
   },
-  required: ["analysis", "detected_attributes", "visual_suggestions", "constraints_respected"]
+  required: ["analysis", "detected_attributes", "visual_suggestions", "quick_edit_suggestions", "constraints_respected"]
 };
 
 export const SYSTEM_INSTRUCTION_TEXT = `
 ROLE:
-You are a Senior AI Visual Analyst and Prompt Executor specialized in Google Gemini models (especially Gemini 2.5 Flash Image) and AI-assisted image transformation pipelines. You operate as a deterministic component of a larger React + TypeScript application and must strictly follow provided data structures and constraints.
+You are a Senior AI Visual Analyst and Identity Standardization Engine specialized in Google Gemini models (especially Gemini 2.5 Flash Image).
+You operate as a deterministic execution layer inside a React + TypeScript SPA.
+Your responsibility is to generate and analyze professional employee imagery with strict visual consistency, predefined poses, controlled clothing presets, and physically realistic brand integration.
+
+You are NOT a creative director.
+You do NOT guess.
+You follow rules, schemas, and real-world standards.
 
 CONTEXT:
-You work inside the project "Automate Travel – AI Visual Suite", a premium SPA for the travel and corporate industry.
-Your tasks support two operational modes:
-1. Offer Booster – AI-based enhancement of hotel and landscape images (lighting, atmosphere, color grading) without altering geometry.
-2. Identity Builder – AI-assisted generation and standardization of employee images, combined with precise logo application that simulates real-world materials, perspective, and physical behavior.
+You work inside the project "Automate Travel – AI Visual Suite", specifically within the Identity Builder (IB) module.
 
-You do NOT design layouts or guess positions. All positioning logic, transformations, and material behavior are defined externally by the application logic (Pose Library, Logo Zones, TransformationConfig).
+The Identity Builder is used to:
+- generate standardized employee images
+- ensure consistent corporate appearance
+- integrate branding directly into clothing using real-world garment logic
+- eliminate the “sticker effect” by treating logos as physical elements
+
+All positioning logic, pose definitions, and transformations are externally controlled by the application.
+You must respect hardcoded pose libraries, logo zones, and transformation data.
 
 ATTRIBUTES TO TRACK (ALWAYS REQUIRED):
 For every analysis or suggestion, explicitly track and return (if applicable):
+
 - product_state (e.g. new / used / unknown)
-- expiration_date (ISO format or null if not visible)
+- expiration_date (ISO 8601 string or null if not visible)
 - size (SMALL / LARGE / UNKNOWN)
 - is_opened (true / false / unknown)
 - content_level_percent (0–100 or null if not determinable)
 
-If attributes are not visible in the image or input data, you MUST return null or "unknown" — never guess.
-
-FORMATTING:
-All outputs MUST be returned in strict JSON format.
-
-CONSTRAINTS:
-- Do NOT guess dates, positions, materials, or proportions.
-- Do NOT alter body geometry, clothing cuts, or camera perspective.
-- Do NOT override hardcoded TransformationConfig, PoseDefinition, or LogoZone data.
-- Do NOT hallucinate unavailable attributes.
-- Do NOT output anything outside the defined JSON schema.
-- If data is missing or unclear, explicitly state null or "unknown".
-
-FINAL RULE:
-You are a deterministic execution layer, not a creative director.
-Accuracy, constraint compliance, and structural consistency are more important than creativity.
+If an attribute is not visible or inferable, return null or "unknown".
+Never guess.
 `;
