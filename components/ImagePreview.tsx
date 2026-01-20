@@ -1,9 +1,7 @@
 import React from 'react';
 import { VisualAnalysisResult, AppMode } from '../types';
 import { AnalysisResultView } from './AnalysisResultView';
-import { Button } from './Button';
-import { Card } from './Card';
-import { PromptInput } from './PromptInput';
+import { CustomEditPanel } from './CustomEditPanel';
 
 interface ImagePreviewProps {
   previewUrl: string | null;
@@ -12,8 +10,6 @@ interface ImagePreviewProps {
   mode: AppMode;
   isComparing: boolean;
   setIsComparing: (v: boolean) => void;
-  isEditing: boolean;
-  setIsEditing: (v: boolean) => void;
   canUndo: boolean;
   onUndo: () => void;
   canRedo: boolean;
@@ -23,6 +19,7 @@ interface ImagePreviewProps {
   onApplyCustomEdit: () => void;
   selectedFile: File | null;
   processingStatus: string | null;
+  tips: string[];
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -32,8 +29,6 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   mode,
   isComparing,
   setIsComparing,
-  isEditing,
-  setIsEditing,
   canUndo,
   onUndo,
   canRedo,
@@ -42,7 +37,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   setEditPrompt,
   onApplyCustomEdit,
   selectedFile,
-  processingStatus
+  processingStatus,
+  tips
 }) => {
   
   const isLoading = !!processingStatus;
@@ -155,30 +151,17 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
             </button>
           </div>
         )}
-        
-        {/* Floating Edit Button (Only visible if not editing) */}
-        {mode !== AppMode.OFFER_BOOSTER && !isEditing && !isLoading && selectedFile && (
-           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
-              <Button variant="secondary" onClick={() => setIsEditing(true)} size="sm">
-                 Manual Edit
-              </Button>
-           </div>
-        )}
       </div>
 
-      {isEditing && mode !== AppMode.OFFER_BOOSTER && (
-        <Card title="Manual Edit (Gemini 2.5)" className="border-amber-500/30 bg-amber-900/10 animate-fade-in shadow-xl shadow-amber-900/10">
-          <PromptInput
-            value={editPrompt}
-            onChange={setEditPrompt}
-            onSubmit={onApplyCustomEdit}
-            isLoading={isLoading}
-            placeholder="Describe the edit (e.g., 'Change the tie to blue', 'Add a company logo on the chest')..."
-            buttonLabel="Apply Edit"
-            onCancel={() => setIsEditing(false)}
-            variant="overlay"
-          />
-        </Card>
+      {/* Manual Edit Panel - Always visible under image for Offer Booster */}
+      {mode === AppMode.OFFER_BOOSTER && selectedFile && (
+         <CustomEditPanel 
+             editPrompt={editPrompt}
+             setEditPrompt={setEditPrompt}
+             isLoading={isLoading}
+             onApply={onApplyCustomEdit}
+             tips={tips}
+         />
       )}
 
       {isLoading && (
@@ -191,7 +174,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
         </div>
       )}
 
-      {analysisResult && !isEditing && !isLoading && (
+      {analysisResult && !isLoading && (
         <AnalysisResultView result={analysisResult} />
       )}
     </div>

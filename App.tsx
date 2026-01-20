@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AppMode, PoseCategory, PoseVariant, AttireType, IdentityConfigState, EnhancementPreset, EnhancementCategory } from './types';
-import { ENHANCEMENT_PRESETS, DEFAULT_TIPS } from './constants';
+import { AppMode, PoseCategory, PoseVariant, AttireType, IdentityConfigState } from './types';
+import { DEFAULT_TIPS } from './constants';
 import { Button } from './components/Button';
 import { ImageUpload } from './components/ImageUpload';
 import { Card } from './components/Card';
@@ -10,6 +10,7 @@ import { ImagePreview } from './components/ImagePreview';
 import { ErrorBanner } from './components/ErrorBanner';
 import { PromptInput } from './components/PromptInput';
 import { OfferBoosterPanel } from './components/OfferBoosterPanel';
+import { getRecommendedPresets } from './utils/smartMatch';
 
 // Custom Hooks
 import { useHistoryManager } from './hooks/useHistoryManager';
@@ -32,9 +33,8 @@ const App: React.FC = () => {
   const [employeePrompt, setEmployeePrompt] = useState('');
   const [selectedEnhancement, setSelectedEnhancement] = useState<string | null>(null);
   const [editPrompt, setEditPrompt] = useState('');
-  const [isEditingMode, setIsEditingMode] = useState(false);
 
-  // API Key Check on Mount (Optional UX Improvement)
+  // API Key Check on Mount
   const [envCheckFailed, setEnvCheckFailed] = useState(false);
   useEffect(() => {
      if (!process.env.API_KEY) setEnvCheckFailed(true);
@@ -48,45 +48,29 @@ const App: React.FC = () => {
   const analysisResult = currentItem?.analysis || null;
   const dynamicTips = currentItem?.tips || DEFAULT_TIPS;
 
-  // Determine granular processing status for UI
-  let processingStatus = null;
-  if (processor.processingState.isAnalyzing) processingStatus = "Analyzing Visual Content...";
-  else if (processor.processingState.isGenerating) processingStatus = "Generating Identity...";
-  else if (processor.processingState.isEnhancing) processingStatus = "Enhancing Aesthetics...";
-  else if (processor.processingState.isEditing) processingStatus = "Applying Custom Edits...";
+  // Granular Status Message
+  const processingStatus = useMemo(() => {
+    if (processor.processingState.isAnalyzing) return "Analyzing Visual Content...";
+    if (processor.processingState.isGenerating) return "Generating Identity...";
+    if (processor.processingState.isEnhancing) return "Enhancing Aesthetics...";
+    if (processor.processingState.isEditing) return "Applying Custom Edits...";
+    return null;
+  }, [processor.processingState]);
 
-  // Smart Recommendations Logic
+  // Smart Recommendations
   const recommendedPresets = useMemo(() => {
-    if (!analysisResult || !analysisResult.analysis) return new Set<string>();
-    
-    const analysisText = analysisResult.analysis.toLowerCase();
-    const recommended = new Set<string>();
-
-    ENHANCEMENT_PRESETS.forEach(preset => {
-        // If analysis mentions ANY tag from the preset, recommend it
-        if (preset.tags.some(tag => analysisText.includes(tag))) {
-            recommended.add(preset.id);
-        }
-    });
-    
-    // Always recommend Universal Studio Clarity if nothing else matches
-    if (recommended.size === 0) {
-        recommended.add('studio_clarity');
-    }
-
-    return recommended;
+    return getRecommendedPresets(analysisResult?.analysis);
   }, [analysisResult]);
 
   // --- Handlers ---
 
   const handleModeChange = (newMode: AppMode) => {
-    if (processor.isBusy) return; // Prevent mode switch during processing
+    if (processor.isBusy) return;
     setMode(newMode);
     historyMgr.resetHistory();
     processor.clearError();
     setEmployeePrompt('');
     setEditPrompt('');
-    setIsEditingMode(false);
     setSelectedEnhancement(null);
     setIdentityConfig({
         pose: { category: PoseCategory.NEUTRAL, variant: PoseVariant.A },
@@ -97,7 +81,7 @@ const App: React.FC = () => {
 
   const runAnalysis = async (file: File, itemId: string) => {
     const context = mode === AppMode.OFFER_BOOSTER 
-        ? "Commercial Marketing Asset (Real Estate, Food, Product, or Lifestyle)" 
+        ? "Travel & Hospitality Marketing Asset (Hotel, Resort, Food, Market, or Landscape)" 
         : "Employee Identity Standardization (Identity Builder)";
 
     const result = await processor.processAnalysis(file, context);
@@ -111,7 +95,6 @@ const App: React.FC = () => {
   };
 
   const handleFileSelect = async (file: File) => {
-    // If we have existing history, replacing the source essentially resets the workflow
     if (historyMgr.history.length > 0) {
         historyMgr.resetHistory();
     }
@@ -127,7 +110,7 @@ const App: React.FC = () => {
         const file = new File([blob], `${source}_${Date.now()}.png`, { type: "image/png" });
         const newItemId = historyMgr.addToHistory(file);
         
-        // Auto-analyze the new result
+        // Auto-analyze new result to keep context fresh
         await runAnalysis(file, newItemId);
     } catch (e) {
         console.error("Failed to process generated image blob", e);
@@ -136,7 +119,6 @@ const App: React.FC = () => {
 
   const handleGenerateEmployee = async () => {
     const referenceImage = historyMgr.history.length > 0 ? historyMgr.history[0].file : null;
-    
     if (!referenceImage) return;
 
     const base64 = await processor.processGeneration(
@@ -168,12 +150,11 @@ const App: React.FC = () => {
     const base64 = await processor.processEdit(selectedFile, editPrompt);
     if (base64) {
         await handleGeneratedImage(base64, "edited");
-        setIsEditingMode(false);
         setEditPrompt('');
     }
   };
 
-  // Show critical Setup Error if API Key is missing
+  // Critical Error State
   if (processor.isApiKeyMissing || envCheckFailed) {
       return (
           <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
@@ -186,14 +167,12 @@ const App: React.FC = () => {
                   <div>
                       <h1 className="text-xl font-bold text-white mb-2">Configuration Required</h1>
                       <p className="text-slate-400 text-sm leading-relaxed">
-                          The Google Gemini API Key is missing from the environment.
-                          <br /><br />
-                          Please verify that <code>process.env.API_KEY</code> is correctly set in your environment variables.
+                          The Google Gemini API Key is missing.
+                          <br />
+                          Check <code>process.env.API_KEY</code>.
                       </p>
                   </div>
-                  <Button onClick={() => window.location.reload()} className="w-full">
-                      Retry Connection
-                  </Button>
+                  <Button onClick={() => window.location.reload()} className="w-full">Retry</Button>
               </div>
           </div>
       );
@@ -204,16 +183,16 @@ const App: React.FC = () => {
       <Header 
         mode={mode} 
         onModeChange={handleModeChange} 
-        disabled={processor.isBusy} // LOCK NAVIGATION
+        disabled={processor.isBusy} 
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* LEFT COLUMN: Input & Configuration */}
+          {/* LEFT COLUMN: Input & Config */}
           <div className="lg:col-span-5 space-y-5">
             
-            {/* 1. IDENTITY BUILDER HEADER (Only Identity Mode) */}
+            {/* Identity Builder Header */}
             {mode === AppMode.IDENTITY_BUILDER && (
                 <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-4 rounded-xl border border-indigo-500/30 shadow-lg flex items-center justify-between gap-4 sticky top-20 z-40 backdrop-blur-md">
                     <div>
@@ -232,7 +211,7 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            {/* 2. UPLOAD CARD */}
+            {/* Upload Area */}
             <Card 
                 title={mode === AppMode.IDENTITY_BUILDER ? "Reference Person (Required)" : "Upload Source Asset"}
                 className={mode === AppMode.IDENTITY_BUILDER && !selectedFile ? "border-amber-500/40 ring-1 ring-amber-500/20 bg-amber-900/5" : ""}
@@ -242,34 +221,28 @@ const App: React.FC = () => {
                   isLoading={processor.isBusy} 
                   hasFile={!!selectedFile}
                />
-               {mode === AppMode.IDENTITY_BUILDER && !selectedFile && (
-                   <div className="flex items-center justify-center gap-2 mt-3 text-amber-400 text-xs font-medium animate-pulse-subtle">
-                       Upload reference photo to unlock configuration
-                   </div>
-               )}
             </Card>
 
-            {/* 3. IDENTITY CONFIGURATION (Mode Specific) */}
+            {/* Identity Configuration - UNLOCKED (Always visible/interactive unless processing) */}
             {mode === AppMode.IDENTITY_BUILDER && (
                 <>
                     <IdentityConfiguration 
                         config={identityConfig}
                         onConfigChange={(updates) => setIdentityConfig(prev => ({ ...prev, ...updates }))}
                         isLoading={processor.isBusy}
-                        disabled={!selectedFile}
+                        disabled={processor.isBusy} // Only disable if actively processing
                     />
-
-                    <div className={`transition-opacity duration-300 ${!selectedFile ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                    <div className={`transition-opacity duration-300 ${processor.isBusy ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                       <Card className="border-indigo-500/10 bg-indigo-900/5">
                         <div className="flex items-center justify-between mb-2 px-1">
-                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Refinements (Optional)</label>
+                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Refinements</label>
                         </div>
                         <PromptInput 
                            value={employeePrompt}
                            onChange={setEmployeePrompt}
                            onSubmit={handleGenerateEmployee}
                            isLoading={processor.isBusy}
-                           placeholder="E.g. 'Add glasses', 'Make lighting warmer', 'Smile more'..."
+                           placeholder="E.g. 'Add glasses', 'Smile more'..."
                            buttonLabel="Generate"
                            variant="default"
                         />
@@ -278,8 +251,8 @@ const App: React.FC = () => {
                 </>
             )}
 
-            {/* 4. OFFER BOOSTER CONFIGURATION (Mode Specific) */}
-            {mode === AppMode.OFFER_BOOSTER && selectedFile && (
+            {/* Offer Booster Panel - SIDEBAR (Quick Actions only) - ALWAYS VISIBLE */}
+            {mode === AppMode.OFFER_BOOSTER && (
                <OfferBoosterPanel
                   selectedFile={selectedFile}
                   analysisResult={analysisResult}
@@ -287,17 +260,13 @@ const App: React.FC = () => {
                   onEnhance={handleEnhancement}
                   isLoading={processor.isBusy}
                   recommendedPresets={recommendedPresets}
-                  editPrompt={editPrompt}
-                  setEditPrompt={setEditPrompt}
-                  onCustomEdit={handleCustomEdit}
-                  tips={dynamicTips}
                />
             )}
 
             <ErrorBanner message={processor.error} onClose={processor.clearError} />
           </div>
 
-          {/* RIGHT COLUMN: Visualization & Results */}
+          {/* RIGHT COLUMN: Preview & Results & Custom Edit */}
           <div className="lg:col-span-7">
               <ImagePreview 
                   previewUrl={previewUrl}
@@ -306,8 +275,6 @@ const App: React.FC = () => {
                   mode={mode}
                   isComparing={isComparing}
                   setIsComparing={setIsComparing}
-                  isEditing={isEditingMode}
-                  setIsEditing={setIsEditingMode}
                   canUndo={historyMgr.canUndo}
                   onUndo={historyMgr.undo}
                   canRedo={historyMgr.canRedo}
@@ -317,9 +284,9 @@ const App: React.FC = () => {
                   onApplyCustomEdit={handleCustomEdit}
                   selectedFile={selectedFile}
                   processingStatus={processingStatus}
+                  tips={dynamicTips}
               />
           </div>
-
         </div>
       </main>
     </div>

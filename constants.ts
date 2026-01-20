@@ -64,10 +64,10 @@ Never guess.
 `;
 
 export const DEFAULT_TIPS = [
-  "Remove clutter from desk",
-  "Remove people in background",
-  "Fix white balance",
-  "Make windows transparent",
+  "Remove clutter",
+  "Blue sky fix",
+  "Warm lighting",
+  "Remove tourists",
   "Sharpen details"
 ];
 
@@ -359,77 +359,77 @@ export const ENHANCEMENT_PRESETS: EnhancementPreset[] = [
   {
     id: "studio_clarity",
     label: "Studio Clarity",
-    description: "General-purpose cleanup, sharpening, and color correction",
+    description: "Universal cleanup. Removes noise, fixes exposure, sharpens.",
     icon: "💎",
     category: "UNIVERSAL",
-    tags: ["universal", "standard", "cleanup", "fix"] // fallback
+    tags: ["universal", "standard", "cleanup", "fix"]
   },
 
-  // --- COMMERCIAL STANDARDS ---
+  // --- COMMERCIAL (TRAVEL STANDARDS) ---
   {
     id: "real_estate_interior",
-    label: "Real Estate (Interior)",
-    description: "HDR lighting, vertical alignment, open airy feel",
-    icon: "🏠",
+    label: "Hotel & Interiors",
+    description: "Bright, airy rooms. Perfect vertical walls. Welcoming atmosphere.",
+    icon: "🏨",
     category: "COMMERCIAL",
-    tags: ["room", "interior", "bedroom", "kitchen", "living room", "bathroom", "indoor", "furniture", "window"]
+    tags: ["room", "interior", "bedroom", "lobby", "hotel", "resort", "suite", "spa", "indoor"]
   },
   {
     id: "culinary_pop",
-    label: "Gourmet Focus",
-    description: "Rich textures, appetizing saturation, shallow depth",
+    label: "Dining & Culinary",
+    description: "Rich textures for restaurants, buffets, and plated dishes.",
     icon: "🍽️",
     category: "COMMERCIAL",
-    tags: ["food", "dish", "plate", "meal", "fruit", "vegetable", "drink", "cocktail", "restaurant", "dining"]
+    tags: ["food", "dish", "plate", "meal", "restaurant", "buffet", "breakfast", "drink", "bar", "dining"]
   },
   {
     id: "ecommerce_hero",
-    label: "Product Studio",
-    description: "Neutral background, perfect isolation lighting",
-    icon: "📦",
+    label: "Market & Details",
+    description: "Focus on local crafts, souvenirs, and architectural details.",
+    icon: "🏺",
     category: "COMMERCIAL",
-    tags: ["product", "object", "bottle", "box", "packaging", "gadget", "toy", "shoe", "clothing", "item"]
+    tags: ["craft", "souvenir", "market", "detail", "object", "macro", "texture", "shopping", "gift"]
   },
   
   // --- ATMOSPHERE & MOOD ---
   {
     id: "golden_hour",
     label: "Golden Hour",
-    description: "Warm sunset lighting, inviting vacation vibes",
+    description: "Warm sunset glow. Best for beaches, exteriors, and landmarks.",
     icon: "🌅",
     category: "ATMOSPHERE",
-    tags: ["outdoor", "exterior", "landscape", "beach", "pool", "garden", "resort", "patio", "sunset", "sunrise"]
+    tags: ["outdoor", "exterior", "landscape", "beach", "pool", "garden", "resort", "patio", "sunset", "sunrise", "view"]
   },
   {
     id: "nordic_soft",
     label: "Nordic Minimalist",
-    description: "Cool, desaturated, clean white tones",
+    description: "Cool, clean, serene. Great for winter destinations or modern spas.",
     icon: "❄️",
     category: "ATMOSPHERE",
-    tags: ["minimal", "white", "clean", "winter", "office", "desk", "modern"]
+    tags: ["minimal", "winter", "snow", "ski", "spa", "modern", "clean", "white"]
   },
   {
     id: "vibrant_tropical",
     label: "Tropical Punch",
-    description: "Deep blues, lush greens, high contrast",
+    description: "Saturated blues and greens. Essential for island and pool promotions.",
     icon: "🏝️",
     category: "ATMOSPHERE",
-    tags: ["tropical", "jungle", "sea", "ocean", "forest", "summer", "vacation"]
+    tags: ["tropical", "jungle", "sea", "ocean", "forest", "summer", "vacation", "swim", "pool", "palm"]
   },
   {
     id: "cinematic_drama",
     label: "Cinematic Mood",
-    description: "Teal/Orange grade, dramatic shadows",
+    description: "High contrast, emotional. Good for nightlife, tours, and culture.",
     icon: "🎬",
     category: "ATMOSPHERE",
-    tags: ["night", "car", "portrait", "urban", "street", "dark", "moody"]
+    tags: ["night", "tour", "city", "urban", "street", "dark", "moody", "culture", "museum"]
   },
   {
     id: "blue_hour",
     label: "Twilight Magic",
-    description: "Evening blue tones with warm window glow",
+    description: "Deep evening blues with warm city lights. Perfect for cityscapes.",
     icon: "🌃",
     category: "ATMOSPHERE",
-    tags: ["twilight", "evening", "city", "skyline", "dusk"]
+    tags: ["twilight", "evening", "city", "skyline", "dusk", "architecture", "night"]
   }
 ];

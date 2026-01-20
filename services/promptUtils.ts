@@ -11,76 +11,86 @@ Provide structured analysis following the required schema.
 `;
 
 export const ENHANCEMENT_PROMPTS = {
-  // --- UNIVERSAL ---
+  // --- UNIVERSAL (CORRECTIVE) ---
   studio_clarity: `
-Apply a universal "High-End Studio" enhancement to this image.
-1. CLARITY: Remove noise and compression artifacts. Sharpen key edges slightly.
-2. LIGHTING: Balance exposure (fix overexposed highlights/crushed blacks). Ensure the subject is well-lit.
-3. COLOR: Correct white balance to be neutral (remove unwanted color casts). Boost vibrance subtly (10%).
-4. OUTPUT: The image should look like it was shot on a high-resolution professional camera. Keep the scene natural, just "better".
+STRICT TASK: Professional Image Restoration & Cleanup.
+INPUT: A raw or imperfect source image.
+OUTPUT: A pristine, high-resolution commercial asset.
+
+ACTIONS:
+1. DENOISE: Remove ISO grain and jpeg artifacts without losing texture details.
+2. EXPOSURE: Balance the histogram. Recover highlighted details, lift crushed blacks slightly.
+3. COLOR: Neutralize color casts (ensure true whites/grays). Boost vibrance naturally (+10%).
+4. SHARPNESS: Apply intelligent sharpening to edges and textures.
+
+CONSTRAINTS:
+- ❌ DO NOT change the composition.
+- ❌ DO NOT add or remove objects.
+- ❌ DO NOT alter facial features or product geometry.
+- ✅ PRESERVE exact structural integrity.
   `,
 
-  // --- COMMERCIAL ---
+  // --- COMMERCIAL (STANDARDS) ---
   real_estate_interior: `
-Apply professional Real Estate Photography standards to this image.
-1. GEOMETRY: Visually straighten vertical lines (architectural correction) to eliminate keystone distortion.
-2. LIGHTING: Apply an HDR effect to balance bright windows with darker interiors. Brighten corners.
-3. COLOR: Ensure walls look clean and whites are pure. Warm up the interior lighting slightly for coziness.
-4. COMPOSITION: Make the space feel spacious and airy.
+Apply "Architectural Digest" Interior Standards.
+1. PERSPECTIVE: Correct vertical keystoning (walls must be 90° vertical).
+2. DYNAMIC RANGE: Balance indoor lighting with outdoor window views (HDR).
+3. AMBIANCE: Brighten corners, warm up artificial lights (2700K-3000K).
+4. CLARITY: Enhance wood grain, fabric textures, and reflective surfaces.
   `,
   culinary_pop: `
-Apply high-end Food Photography styling to this image.
-1. TEXTURE: Emphasize the texture of the food (crispness, gloss, freshness). Add specular highlights to liquids/sauces.
-2. COLOR: Boost saturation of fresh ingredients (greens, reds) to look appetizing.
-3. DEPTH: Simulate a mild depth of field to separate the hero dish from the background.
-4. LIGHTING: Use soft, directional "window light" from the side.
+Apply "Michelin Guide" Food Photography Standards.
+1. APPETITE APPEAL: Boost saturation of fresh elements (herbs, fruits, sear marks).
+2. LIGHTING: Create a "Rembrandt" lighting scheme (directional, soft shadows).
+3. FOCUS: Simulate f/2.8 aperture to isolate the dish from the background.
+4. FINISH: Enhance gloss/specular highlights on sauces and moisture.
   `,
   ecommerce_hero: `
-Apply Commercial Product Photography standards.
-1. ISOLATION: Clean up the background to be neutral and non-distracting (smooth studio look).
-2. LIGHTING: Use even, softbox-style lighting to eliminate harsh shadows and highlight product form.
-3. FIDELITY: Ensure accurate product color representation with high contrast and clarity.
-4. MATERIALS: Enhance material properties (metal looks metallic, glass looks clear).
+Apply "Amazon/Shopify" Hero Image Standards.
+1. ISOLATION: Ensure the background is clean, neutral, and distraction-free.
+2. FORM: Use "Butterfly Lighting" to define the product's 3D shape.
+3. ACCURACY: Maximize color fidelity and text readability on labels.
+4. SURFACE: Make matte surfaces uniform and glossy surfaces reflective.
   `,
 
-  // --- ATMOSPHERIC ---
+  // --- ATMOSPHERIC (CREATIVE) ---
   golden_hour: `
-Transform this image to have a warm golden hour lighting effect.
-Add warm orange/amber tones, soft diffused sunlight, long shadows.
-Enhance atmospheric quality while maintaining natural appearance.
-Optimize for hospitality marketing and booking appeal.
+Style: "Luxury Travel Magazine" - Golden Hour.
+Lighting: Warm, low-angle sunlight (approx 3500K).
+Mood: Relaxing, expensive, inviting.
+Shadows: Long, soft, dramatic.
+Best for: Exteriors, patios, portraits.
   `,
   modern_bright: `
-Enhance this image with modern bright clean aesthetic.
-Increase brightness and clarity, boost vibrant colors slightly.
-Add crisp clean modern feel suitable for contemporary marketing.
-Maintain natural appearance, avoid oversaturation.
+Style: "Modern Tech/Startup" - High Key.
+Lighting: Bright, even, diffuse white light.
+Color: Cool undertones, high brightness, moderate contrast.
+Mood: Clean, efficient, optimistic, futuristic.
   `,
   vibrant_tropical: `
-Transform this image with a vibrant, punchy color palette suitable for tropical or summer marketing.
-Boost saturation specifically in blues (sky/water) and greens (foliage).
-Increase contrast slightly to make colors pop.
-Ensure lighting looks like bright, direct midday sun.
+Style: "Summer Vacation" - High Saturation.
+Colors: Push Teal (Sky/Water) and Orange (Skin/Sand) contrast.
+Lighting: Hard, direct noon sunlight simulation.
+Mood: Energetic, hot, exciting.
   `,
   nordic_soft: `
-Apply a Nordic/Scandi minimalist aesthetic to this image.
-Use cool, slightly desaturated tones.
-Soften the lighting to create a diffuse, airy look with low contrast.
-Ensure whites are crisp and neutral.
-Create a calm, serene, and sophisticated atmosphere.
+Style: "Scandi Minimalist" - Desaturated.
+Lighting: Overcast, ultra-soft window light.
+Color: Low saturation, slate blues, crisp whites, charcoal grays.
+Mood: Calm, silent, expensive, organic.
   `,
   cinematic_drama: `
-Apply a cinematic color grade to this image.
-Increase contrast to create deep, rich shadows and distinct highlights.
-Use a subtle teal/orange split-tone (warmer highlights, cooler shadows).
-Focus on mood, depth, and atmospheric lighting.
-Make the image feel expensive and high-end.
+Style: "Blockbuster Movie" - Color Grade.
+Grading: Teal/Orange split tone.
+Contrast: High (Crushed blacks, bright highlights).
+Lighting: Chiaroscuro effect (strong play of light and dark).
+Mood: Intense, emotional, premium.
   `,
   blue_hour: `
-Transform this image to simulate "Blue Hour" lighting (just after sunset).
-Cast a deep, rich blue tone over the sky and environment.
-If there are artificial lights (windows, streetlamps), ensure they glow warmly against the cool background.
-Create a magical, evening twilight atmosphere.
+Style: "Luxury Evening" - Twilight.
+Sky: Deep royal blue/purple gradient.
+Practical Lights: Warm glow from windows/lamps (contrast against blue sky).
+Mood: Magical, cozy, premium nightlife.
   `
 };
 

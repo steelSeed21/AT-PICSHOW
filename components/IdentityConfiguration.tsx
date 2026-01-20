@@ -74,7 +74,7 @@ export const IdentityConfiguration: React.FC<IdentityConfigurationProps> = ({
                     
                     <ImageUpload 
                       onFileSelect={(file) => onConfigChange({ logoFile: file })}
-                      isLoading={isLoading}
+                      isLoading={isLoading || disabled}
                       hasFile={!!config.logoFile}
                       variant="compact"
                       label={config.logoFile ? "Replace Logo Asset" : "Click to Upload Logo"}
@@ -103,6 +103,7 @@ export const IdentityConfiguration: React.FC<IdentityConfigurationProps> = ({
                             onClick={() => onConfigChange({ logoFile: null })} 
                             className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors"
                             title="Remove logo"
+                            disabled={disabled || isLoading}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -120,23 +121,6 @@ export const IdentityConfiguration: React.FC<IdentityConfigurationProps> = ({
             </div>
          )}
       </div>
-      
-      {/* Disabled Overlay */}
-      {disabled && (
-        <div className="absolute inset-0 z-10 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center transition-all">
-            <div className="bg-slate-900 border border-slate-600 px-5 py-3 rounded-xl text-sm text-slate-300 shadow-2xl flex items-center gap-3 transform translate-y-0">
-                <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <div className="font-semibold text-white">Source Asset Required</div>
-                    <div className="text-xs text-slate-400">Upload a reference photo to begin configuration</div>
-                </div>
-            </div>
-        </div>
-      )}
     </div>
   );
 };
