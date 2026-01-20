@@ -35,7 +35,10 @@ export const CustomEditPanel: React.FC<CustomEditPanelProps> = ({
       </div>
       
       <div className="mb-4">
-        <p className="text-xs text-slate-500 mb-2">Smart Tips:</p>
+        <div className="flex items-center gap-2 mb-2">
+           <span className="text-indigo-400 text-xs">✨</span>
+           <p className="text-xs text-indigo-200 font-medium">AI Detected Fixes (Analysis Results):</p>
+        </div>
         <div className="flex flex-wrap gap-2">
           {tips.map((chip, idx) => {
             const isSelected = editPrompt.includes(chip);
@@ -46,7 +49,7 @@ export const CustomEditPanel: React.FC<CustomEditPanelProps> = ({
                   className={`text-xs px-3 py-1 rounded-full transition-all animate-fade-in border ${
                       isSelected 
                       ? 'bg-indigo-600 text-white border-indigo-500' 
-                      : 'bg-indigo-900/40 hover:bg-indigo-600 hover:text-white text-indigo-200 border-indigo-700/50 hover:border-indigo-500'
+                      : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-indigo-500 hover:text-white'
                   }`}
                   disabled={isLoading}
               >
@@ -62,7 +65,7 @@ export const CustomEditPanel: React.FC<CustomEditPanelProps> = ({
         onChange={setEditPrompt}
         onSubmit={onApply}
         isLoading={isLoading}
-        placeholder="Describe specific adjustments (e.g. 'remove glare', 'make lights warmer')..."
+        placeholder="Select an AI fix above or describe specific adjustments..."
         buttonLabel="Generate Custom Edit"
         variant="default"
       />

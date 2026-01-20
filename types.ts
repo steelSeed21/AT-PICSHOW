@@ -182,7 +182,7 @@ export const AnalysisSchema: Schema = {
     },
     quick_edit_suggestions: {
       type: Type.ARRAY,
-      description: "List of 5-6 short, actionable 2-4 word phrases to improve this specific image (e.g., 'Fix white balance', 'Remove glare').",
+      description: "List of 4-6 specific, imperative commands to fix detected flaws (e.g., 'Remove trash bin', 'Brighten shadows', 'Straighten horizon'). Do not use vague advice.",
       items: { type: Type.STRING }
     },
     constraints_respected: { type: Type.BOOLEAN }

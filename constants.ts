@@ -8,23 +8,23 @@ import { HarmCategory, HarmBlockThreshold } from '@google/genai';
 export const SAFETY_SETTINGS = [
   {
     category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   }
 ];
 
@@ -51,9 +51,9 @@ If an attribute is not visible, return null or "unknown" and a low confidence sc
 
 export const DEFAULT_TIPS = [
   "Remove clutter",
+  "Straighten horizon",
   "Blue sky fix",
   "Warm lighting",
-  "Remove tourists",
   "Sharpen details"
 ];
 
@@ -401,5 +401,13 @@ export const ENHANCEMENT_PRESETS: EnhancementPreset[] = [
     icon: "🏝️",
     category: "ATMOSPHERE",
     tags: ["tropical", "jungle", "sea", "ocean", "forest", "summer", "vacation", "swim", "pool", "palm"]
+  },
+  {
+    id: "cinematic_drama",
+    label: "Cinema Drama",
+    description: "High contrast, teal & orange grade. Intense movie aesthetics.",
+    icon: "🎬",
+    category: "ATMOSPHERE",
+    tags: ["movie", "film", "cinema", "dramatic", "contrast", "dark", "night"]
   }
 ];

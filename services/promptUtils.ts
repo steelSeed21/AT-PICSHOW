@@ -6,7 +6,23 @@ import { ATTIRE_LOGO_MAPPING, POSE_VARIANTS } from '../constants';
 // ============================================================================
 
 export const ANALYSIS_PROMPT_TEMPLATE = (context: string) => `
-Analyze this image in the context of: ${context}. 
+ROLE: Senior Photo Editor & Conversion Rate Optimizer (CRO) Specialist.
+CONTEXT: ${context}.
+
+OBJECTIVE:
+Analyze the input image to identify SPECIFIC visual flaws that reduce its commercial value.
+Your goal is to populate the 'quick_edit_suggestions' list with DIRECT, IMPERATIVE COMMANDS to fix these specific flaws.
+
+ANALYSIS INSTRUCTIONS:
+1. Scan for Technical Flaws: Noise, blur, bad white balance, overexposure, underexposure.
+2. Scan for Composition Flaws: Crooked horizon, distracting objects, clutter, bad framing.
+3. Scan for Aesthetic Flaws: Dull colors, unappetizing food texture, messy background.
+
+OUTPUT REQUIREMENTS for 'quick_edit_suggestions':
+- Must be ACTIONABLE VERBS (e.g., "Remove trash bin", "Brighten shadows", "Straighten horizon").
+- Must be specific to THIS image (do not suggest "Remove people" if there are no people).
+- Limit to 3-5 high-impact fixes that would immediately boost the "Offer Strength".
+
 Provide structured analysis following the required schema.
 `;
 
@@ -94,15 +110,49 @@ Mood: Magical, cozy, premium nightlife.
   `
 };
 
-export const EDIT_STRICT_CONSTRAINT_PROMPT = (userPrompt: string) => `
-ROLE: Professional Photo Editor.
-TASK: Edit the image according to the User Request.
-USER REQUEST: ${userPrompt}
-REQUIREMENTS:
-- High resolution and photorealistic.
-- Professional lighting.
-- Maintain the scene integrity unless asked to change.
+export const EDIT_STRICT_CONSTRAINT_PROMPT = (userPrompt: string) => {
+  // Detect geometric keywords
+  const isGeometric = /straighten|align|crop|horizon|rotate|tilt|level|center|perspective|skew|distortion/i.test(userPrompt);
+
+  // If geometric keywords are present, inject strong overrides
+  const geometricHeader = isGeometric ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ GEOMETRIC TRANSFORMATION REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The user has requested a spatial adjustment (Rotation/Cropping/Perspective).
+YOU MUST:
+1. ROTATE the image grid to align vertical/horizontal lines (e.g., fix crooked horizon).
+2. CROP strictly to remove any black/empty edges caused by rotation.
+3. DISREGARD any previous instructions to "preserve composition" or "maintain framing".
+4. RE-RENDER the entire scene with the new corrected perspective.
+` : '';
+
+  // If NOT geometric, we enforce composition preservation to prevent unwanted changes
+  const compositionConstraint = !isGeometric 
+    ? '5. COMPOSITION: Preserve original framing and composition unless explicitly asked to change it.' 
+    : '5. COMPOSITION: You are AUTHORIZED to change framing/cropping to achieve the geometric correction.';
+
+  return `
+ROLE: High-End Commercial Retoucher & Visual Artist.
+TASK: Execute the SPECIFIC user request with HIGH VISUAL IMPACT and precision.
+USER REQUEST: "${userPrompt}"
+
+${geometricHeader}
+
+EXECUTION GUIDELINES:
+1. IMPACT: The requested change must be clearly visible and definitive.
+2. CLARITY: Maintain razor-sharp details and high micro-contrast.
+3. REALISM: Use photorealistic lighting and material physics.
+4. SCOPE: Modify ONLY what is requested.
+${compositionConstraint}
+
+TECHNICAL SPECS:
+- High Dynamic Range (HDR)
+- Zero Noise
+- Crisp Textures
+- Professional Color Grading
 `;
+};
 
 // ============================================================================
 // DYNAMIC PROMPT BUILDERS (IDENTITY BUILDER)
