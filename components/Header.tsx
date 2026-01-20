@@ -11,15 +11,19 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, disabled }) 
   return (
     <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
-             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-             </svg>
+        <div className="flex items-center gap-4">
+          {/* Inline SVG Logo to guarantee visibility without external dependencies */}
+          <svg width="170" height="26" viewBox="0 0 170 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Automate.travel">
+            {/* Icon Mark */}
+            <path d="M12.5 5C9.5 5 7.5 7 7 9C6.5 7 4.5 5 1.5 5C0.5 5 0 5.5 0 6V18C0 19.5 1.5 21 3.5 21C6.5 21 8.5 19 9 17C9.5 19 11.5 21 14.5 21C16.5 21 18 19.5 18 18V6C18 5.5 17.5 5 16.5 5C15.5 5 13.5 5 12.5 5ZM3.5 19C2.5 19 2 18.5 2 18V7C2.5 6.5 4 6.5 5 7.5C6 8.5 6 10.5 6 10.5V17C6 17 5.5 18.5 3.5 19ZM14.5 19C13.5 19 12 18.5 12 17V10.5C12 10.5 12 8.5 13 7.5C14 6.5 15.5 6.5 16 7V18C16 18.5 15.5 19 14.5 19Z" fill="white"/>
+            {/* Text Logo */}
+            <text x="26" y="19" fill="white" fontFamily="Inter, sans-serif" fontSize="18" fontWeight="700">Automate.</text>
+            <text x="118" y="19" fill="#818CF8" fontFamily="Inter, sans-serif" fontSize="18" fontWeight="400">travel</text>
+          </svg>
+          
+          <div className="text-lg md:text-xl font-bold border-l border-slate-700 pl-4 ml-1">
+            <span className="font-light text-slate-500 hidden sm:inline">AI Visual Suite v2</span>
           </div>
-          <h1 className="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-            Automate Travel <span className="font-light text-slate-500 hidden sm:inline">| AI Visual Suite v2</span>
-          </h1>
         </div>
         <nav className={`flex gap-1 bg-slate-800 p-1 rounded-lg border border-slate-700 transition-opacity ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <button
