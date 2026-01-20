@@ -10,17 +10,19 @@ interface ImagePreviewProps {
   originalUrl: string | null;
   analysisResult: VisualAnalysisResult | null;
   mode: AppMode;
-  isLoading: boolean;
   isComparing: boolean;
   setIsComparing: (v: boolean) => void;
   isEditing: boolean;
   setIsEditing: (v: boolean) => void;
-  hasEdits: boolean;
+  canUndo: boolean;
   onUndo: () => void;
+  canRedo: boolean;
+  onRedo: () => void;
   editPrompt: string;
   setEditPrompt: (val: string) => void;
   onApplyCustomEdit: () => void;
   selectedFile: File | null;
+  processingStatus: string | null;
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -28,19 +30,22 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   originalUrl,
   analysisResult,
   mode,
-  isLoading,
   isComparing,
   setIsComparing,
   isEditing,
   setIsEditing,
-  hasEdits,
+  canUndo,
   onUndo,
+  canRedo,
+  onRedo,
   editPrompt,
   setEditPrompt,
   onApplyCustomEdit,
-  selectedFile
+  selectedFile,
+  processingStatus
 }) => {
-
+  
+  const isLoading = !!processingStatus;
   const activeImage = isComparing && originalUrl ? originalUrl : previewUrl;
 
   const handleCompareKeyDown = (e: React.KeyboardEvent) => {
@@ -98,19 +103,31 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
           <span className={`backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/10 shadow-xl ${
               isComparing ? 'bg-amber-600/90' : (mode === AppMode.IDENTITY_BUILDER && !analysisResult ? 'bg-indigo-600/90' : 'bg-black/70')
           }`}>
-            {isComparing ? 'ORIGINAL SOURCE' : (mode === AppMode.IDENTITY_BUILDER && !analysisResult ? 'GENERATED IDENTITY' : (hasEdits ? 'ENHANCED RESULT' : 'SOURCE INPUT'))}
+            {isComparing ? 'ORIGINAL SOURCE' : (mode === AppMode.IDENTITY_BUILDER && !analysisResult ? 'GENERATED IDENTITY' : (canUndo ? 'ENHANCED RESULT' : 'SOURCE INPUT'))}
           </span>
         </div>
 
-        {/* UNDO BUTTON */}
-        {hasEdits && !isLoading && !isComparing && (
-          <div className="absolute top-4 right-4 z-20">
+        {/* UNDO / REDO CONTROLS */}
+        {!isLoading && !isComparing && (
+          <div className="absolute top-4 right-4 z-20 flex gap-2">
             <button
               onClick={onUndo}
-              className="bg-black/50 backdrop-blur-md border border-white/20 text-white p-2 rounded-full hover:bg-black/70 active:scale-95 transition-all shadow-lg group-undo focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              title="Undo last change"
+              disabled={!canUndo}
+              className={`bg-black/50 backdrop-blur-md border border-white/20 text-white p-2 rounded-full hover:bg-black/70 active:scale-95 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!canUndo ? 'opacity-30 cursor-not-allowed' : ''}`}
+              title="Undo"
             >
-               <svg className="w-5 h-5 text-slate-200 group-undo-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+               </svg>
+            </button>
+            
+            <button
+              onClick={onRedo}
+              disabled={!canRedo}
+              className={`bg-black/50 backdrop-blur-md border border-white/20 text-white p-2 rounded-full hover:bg-black/70 active:scale-95 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!canRedo ? 'opacity-30 cursor-not-allowed' : ''}`}
+              title="Redo"
+            >
+               <svg className="w-5 h-5 transform scale-x-[-1]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                </svg>
             </button>
@@ -118,7 +135,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
         )}
 
         {/* COMPARE BUTTON */}
-        {hasEdits && !isLoading && (
+        {canUndo && !isLoading && (
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
             <button
               onMouseDown={() => setIsComparing(true)}
@@ -167,11 +184,14 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-12 space-y-4 animate-pulse">
            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-           <p className="text-slate-400 font-mono text-sm">Processing with Gemini 2.5...</p>
+           <div className="text-center">
+             <p className="text-slate-300 font-medium text-lg">{processingStatus}</p>
+             <p className="text-slate-500 text-sm mt-1">Powered by Gemini 2.5</p>
+           </div>
         </div>
       )}
 
-      {analysisResult && !isEditing && (
+      {analysisResult && !isEditing && !isLoading && (
         <AnalysisResultView result={analysisResult} />
       )}
     </div>

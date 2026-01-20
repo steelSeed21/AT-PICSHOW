@@ -4,9 +4,10 @@ import { AppMode } from '../types';
 interface HeaderProps {
   mode: AppMode;
   onModeChange: (mode: AppMode) => void;
+  disabled?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ mode, onModeChange }) => {
+export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, disabled }) => {
   return (
     <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -20,23 +21,25 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange }) => {
             Automate Travel <span className="font-light text-slate-500 hidden sm:inline">| AI Visual Suite v2</span>
           </h1>
         </div>
-        <nav className="flex gap-1 bg-slate-800 p-1 rounded-lg border border-slate-700">
+        <nav className={`flex gap-1 bg-slate-800 p-1 rounded-lg border border-slate-700 transition-opacity ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <button
             onClick={() => onModeChange(AppMode.OFFER_BOOSTER)}
+            disabled={disabled}
             className={`px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
               mode === AppMode.OFFER_BOOSTER 
                 ? 'bg-indigo-600 text-white shadow-lg' 
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700'
             }`}
           >
             Offer Booster
           </button>
           <button
             onClick={() => onModeChange(AppMode.IDENTITY_BUILDER)}
+            disabled={disabled}
             className={`px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
               mode === AppMode.IDENTITY_BUILDER 
                 ? 'bg-indigo-600 text-white shadow-lg' 
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700'
             }`}
           >
             Identity Builder

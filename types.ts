@@ -10,10 +10,34 @@ export enum AppMode {
 // ============================================================================
 
 export interface HistoryItem {
+  id: string; // Unique identifier for stable rendering and updates
   file: File;
   url: string;
   analysis: VisualAnalysisResult | null;
   tips: string[];
+  timestamp: number;
+}
+
+export interface ProcessingState {
+  isAnalyzing: boolean;
+  isGenerating: boolean;
+  isEnhancing: boolean;
+  isEditing: boolean;
+}
+
+// ============================================================================
+// ENHANCEMENT SYSTEM
+// ============================================================================
+
+export type EnhancementCategory = 'UNIVERSAL' | 'COMMERCIAL' | 'ATMOSPHERE';
+
+export interface EnhancementPreset {
+  id: string;
+  label: string;
+  description: string;
+  icon: string;
+  category: EnhancementCategory;
+  tags: string[]; // Keywords to match against analysis for recommendations
 }
 
 // ============================================================================

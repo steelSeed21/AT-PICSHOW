@@ -24,7 +24,7 @@ const ATTIRE_DESCRIPTIONS: Record<AttireType, string> = {
   [AttireType.JACKET]: 'Casual or technical jacket'
 };
 
-// Helper functions (moved local to component as they are UI helpers)
+// Helper functions
 function getAttireDisplayName(attire: AttireType): string {
   const names: Record<AttireType, string> = {
     [AttireType.SUIT]: 'Business Suit',
@@ -64,7 +64,7 @@ export const AttireSelector: React.FC<AttireSelectorProps> = ({
       </label>
       
       {/* Attire Type Selection Grid */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-2" role="group" aria-label="Attire Selection">
         {Object.values(AttireType).map(attire => {
           const logoInfo = ATTIRE_LOGO_MAPPING[attire];
           const isSelected = selected === attire;
@@ -72,16 +72,18 @@ export const AttireSelector: React.FC<AttireSelectorProps> = ({
           return (
             <button
               key={attire}
+              type="button"
               onClick={() => !disabled && onAttireChange(attire)}
               disabled={disabled}
-              className={`p-4 rounded-xl text-center transition-all border-2 relative group ${
+              aria-pressed={isSelected}
+              className={`p-4 rounded-xl text-center transition-all border-2 relative group outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:ring-offset-slate-900 ${
                 isSelected
                   ? 'bg-indigo-900/40 border-indigo-500 shadow-xl shadow-indigo-900/50 ring-2 ring-indigo-400/30'
                   : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-800'
-              } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              } ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer'}`}
             >
               {/* Icon */}
-              <div className="text-3xl mb-2">{ATTIRE_ICONS[attire]}</div>
+              <div className="text-3xl mb-2" aria-hidden="true">{ATTIRE_ICONS[attire]}</div>
               
               {/* Name */}
               <div className="text-xs text-white font-semibold mb-1 capitalize">
@@ -97,10 +99,12 @@ export const AttireSelector: React.FC<AttireSelectorProps> = ({
                 {getLogoTechniqueDisplayName(logoInfo.technique)}
               </div>
 
-              {/* Hover Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-xl">
-                {ATTIRE_DESCRIPTIONS[attire]}
-              </div>
+              {/* Hover Tooltip - Only show if not disabled */}
+              {!disabled && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-xl">
+                    {ATTIRE_DESCRIPTIONS[attire]}
+                </div>
+              )}
             </button>
           );
         })}

@@ -1,4 +1,4 @@
-import { AttireType, LogoTechnique, LogoPlacement, PoseCategory, PoseVariant, PoseConfig } from './types';
+import { AttireType, LogoTechnique, LogoPlacement, PoseCategory, PoseVariant, PoseConfig, EnhancementPreset } from './types';
 import { HarmCategory, HarmBlockThreshold } from '@google/genai';
 
 // ============================================================================
@@ -64,9 +64,11 @@ Never guess.
 `;
 
 export const DEFAULT_TIPS = [
-  "Improve lighting",
-  "Enhance colors",
-  "Remove clutter"
+  "Remove clutter from desk",
+  "Remove people in background",
+  "Fix white balance",
+  "Make windows transparent",
+  "Sharpen details"
 ];
 
 // ============================================================================
@@ -349,26 +351,85 @@ CRITICAL RENDERING REQUIREMENTS:
 };
 
 // ============================================================================
-// OFFER BOOSTER PRESETS
+// OFFER BOOSTER PRESETS (GROUPED)
 // ============================================================================
 
-export const ENHANCEMENT_PRESETS = [
+export const ENHANCEMENT_PRESETS: EnhancementPreset[] = [
+  // --- UNIVERSAL ---
+  {
+    id: "studio_clarity",
+    label: "Studio Clarity",
+    description: "General-purpose cleanup, sharpening, and color correction",
+    icon: "💎",
+    category: "UNIVERSAL",
+    tags: ["universal", "standard", "cleanup", "fix"] // fallback
+  },
+
+  // --- COMMERCIAL STANDARDS ---
+  {
+    id: "real_estate_interior",
+    label: "Real Estate (Interior)",
+    description: "HDR lighting, vertical alignment, open airy feel",
+    icon: "🏠",
+    category: "COMMERCIAL",
+    tags: ["room", "interior", "bedroom", "kitchen", "living room", "bathroom", "indoor", "furniture", "window"]
+  },
+  {
+    id: "culinary_pop",
+    label: "Gourmet Focus",
+    description: "Rich textures, appetizing saturation, shallow depth",
+    icon: "🍽️",
+    category: "COMMERCIAL",
+    tags: ["food", "dish", "plate", "meal", "fruit", "vegetable", "drink", "cocktail", "restaurant", "dining"]
+  },
+  {
+    id: "ecommerce_hero",
+    label: "Product Studio",
+    description: "Neutral background, perfect isolation lighting",
+    icon: "📦",
+    category: "COMMERCIAL",
+    tags: ["product", "object", "bottle", "box", "packaging", "gadget", "toy", "shoe", "clothing", "item"]
+  },
+  
+  // --- ATMOSPHERE & MOOD ---
   {
     id: "golden_hour",
     label: "Golden Hour",
-    prompt: "Enhance this image with warm golden hour lighting, soft shadows, and a welcoming sunset atmosphere. Make it look inviting and premium.",
-    iconName: "sun"
+    description: "Warm sunset lighting, inviting vacation vibes",
+    icon: "🌅",
+    category: "ATMOSPHERE",
+    tags: ["outdoor", "exterior", "landscape", "beach", "pool", "garden", "resort", "patio", "sunset", "sunrise"]
   },
   {
-    id: "modern_bright",
-    label: "Modern & Bright",
-    prompt: "Brighten the image with clean, natural white lighting. Increase clarity, reduce noise, and make the space feel airy and modern. Professional interior photography style.",
-    iconName: "sparkles"
+    id: "nordic_soft",
+    label: "Nordic Minimalist",
+    description: "Cool, desaturated, clean white tones",
+    icon: "❄️",
+    category: "ATMOSPHERE",
+    tags: ["minimal", "white", "clean", "winter", "office", "desk", "modern"]
   },
   {
-    id: "declutter",
-    label: "Clean & Tidy",
-    prompt: "Digitally remove clutter and imperfections. Smooth out surfaces, balance the exposure, and make the image look like a polished, professional brochure photo.",
-    iconName: "magic"
+    id: "vibrant_tropical",
+    label: "Tropical Punch",
+    description: "Deep blues, lush greens, high contrast",
+    icon: "🏝️",
+    category: "ATMOSPHERE",
+    tags: ["tropical", "jungle", "sea", "ocean", "forest", "summer", "vacation"]
+  },
+  {
+    id: "cinematic_drama",
+    label: "Cinematic Mood",
+    description: "Teal/Orange grade, dramatic shadows",
+    icon: "🎬",
+    category: "ATMOSPHERE",
+    tags: ["night", "car", "portrait", "urban", "street", "dark", "moody"]
+  },
+  {
+    id: "blue_hour",
+    label: "Twilight Magic",
+    description: "Evening blue tones with warm window glow",
+    icon: "🌃",
+    category: "ATMOSPHERE",
+    tags: ["twilight", "evening", "city", "skyline", "dusk"]
   }
 ];
