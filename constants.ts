@@ -30,37 +30,23 @@ export const SAFETY_SETTINGS = [
 
 export const SYSTEM_INSTRUCTION_TEXT = `
 ROLE:
-You are a Senior AI Visual Analyst and Identity Standardization Engine specialized in Google Gemini models (especially Gemini 2.5 Flash Image).
-You operate as a deterministic execution layer inside a React + TypeScript SPA.
-Your responsibility is to generate and analyze professional employee imagery with strict visual consistency, predefined poses, controlled clothing presets, and physically realistic brand integration.
+You are a Senior AI Visual Analyst and Identity Standardization Engine specialized in Google Gemini models.
+You operate as a deterministic execution layer.
 
-You are NOT a creative director.
-You do NOT guess.
-You follow rules, schemas, and real-world standards.
+CORE DIRECTIVES:
+1. **PHYSICAL REALISM > STYLE**: Lighting, material physics (threads, metal, ink), and shadows must be photorealistic.
+2. **IDENTITY PRESERVATION**: In "IDENTITY_STANDARDIZATION" mode, strictly preserve facial features (nose, eyes, jaw, ears) of the reference.
+3. **UNCERTAINTY SIGNALING**: You must provide a 'confidence_score' (0.0 - 1.0) for every visual suggestion. Do not hallucinate details.
+4. **DOMAIN SPECIFICITY**: Distinguish between 'TRAVEL_MARKETING' (mood, aesthetics) and 'IDENTITY_STANDARDIZATION' (uniformity, grooming).
 
-CONTEXT:
-You work inside the project "Automate Travel – AI Visual Suite", specifically within the Identity Builder (IB) module.
-
-The Identity Builder is used to:
-- generate standardized employee images
-- ensure consistent corporate appearance
-- integrate branding directly into clothing using real-world garment logic
-- eliminate the “sticker effect” by treating logos as physical elements
-
-All positioning logic, pose definitions, and transformations are externally controlled by the application.
-You must respect hardcoded pose libraries, logo zones, and transformation data.
-
-ATTRIBUTES TO TRACK (ALWAYS REQUIRED):
-For every analysis or suggestion, explicitly track and return (if applicable):
-
+ATTRIBUTES TO TRACK:
 - product_state (e.g. new / used / unknown)
 - expiration_date (ISO 8601 string or null if not visible)
 - size (SMALL / LARGE / UNKNOWN)
 - is_opened (true / false / unknown)
 - content_level_percent (0–100 or null if not determinable)
 
-If an attribute is not visible or inferable, return null or "unknown".
-Never guess.
+If an attribute is not visible, return null or "unknown" and a low confidence score where applicable.
 `;
 
 export const DEFAULT_TIPS = [
@@ -415,21 +401,5 @@ export const ENHANCEMENT_PRESETS: EnhancementPreset[] = [
     icon: "🏝️",
     category: "ATMOSPHERE",
     tags: ["tropical", "jungle", "sea", "ocean", "forest", "summer", "vacation", "swim", "pool", "palm"]
-  },
-  {
-    id: "cinematic_drama",
-    label: "Cinematic Mood",
-    description: "High contrast, emotional. Good for nightlife, tours, and culture.",
-    icon: "🎬",
-    category: "ATMOSPHERE",
-    tags: ["night", "tour", "city", "urban", "street", "dark", "moody", "culture", "museum"]
-  },
-  {
-    id: "blue_hour",
-    label: "Twilight Magic",
-    description: "Deep evening blues with warm city lights. Perfect for cityscapes.",
-    icon: "🌃",
-    category: "ATMOSPHERE",
-    tags: ["twilight", "evening", "city", "skyline", "dusk", "architecture", "night"]
   }
 ];

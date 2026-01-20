@@ -10,6 +10,11 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result }
   return (
     <div className="space-y-6 animate-fade-in">
       <Card title="Executive Visual Analysis">
+        <div className="flex items-center gap-2 mb-3">
+             <span className="text-[10px] font-mono uppercase bg-slate-900 text-indigo-400 px-2 py-1 rounded border border-indigo-900/50">
+                {result.domain.replace('_', ' ')}
+             </span>
+        </div>
         <p className="text-slate-300 leading-relaxed text-lg">{result.analysis}</p>
       </Card>
 
@@ -63,21 +68,36 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result }
           </div>
         </Card>
 
-        <Card title="Visual Suggestions">
+        <Card title="Visual Suggestions (with Confidence)">
           <div className="space-y-4">
             {result.visual_suggestions.map((suggestion, idx) => (
               <div key={idx} className="bg-slate-800 rounded-lg p-4 border-l-4 border-amber-500">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-bold text-amber-500 text-xs tracking-wider uppercase">{suggestion.type}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                    suggestion.risk_level === 'LOW' ? 'bg-green-900 text-green-300' :
-                    suggestion.risk_level === 'MEDIUM' ? 'bg-yellow-900 text-yellow-300' :
-                    'bg-red-900 text-red-300'
-                  }`}>
-                    RISK: {suggestion.risk_level}
-                  </span>
+                  <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                        suggestion.risk_level === 'LOW' ? 'bg-green-900 text-green-300' :
+                        suggestion.risk_level === 'MEDIUM' ? 'bg-yellow-900 text-yellow-300' :
+                        'bg-red-900 text-red-300'
+                      }`}>
+                        RISK: {suggestion.risk_level}
+                      </span>
+                  </div>
                 </div>
-                <p className="text-slate-300 text-sm">{suggestion.description}</p>
+                <p className="text-slate-300 text-sm mb-3">{suggestion.description}</p>
+                
+                {/* Confidence Meter */}
+                <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-indigo-500 rounded-full"
+                            style={{ width: `${suggestion.confidence_score * 100}%` }}
+                        ></div>
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                        {(suggestion.confidence_score * 100).toFixed(0)}% CONFIDENCE
+                    </span>
+                </div>
               </div>
             ))}
           </div>

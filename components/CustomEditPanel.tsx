@@ -30,7 +30,7 @@ export const CustomEditPanel: React.FC<CustomEditPanelProps> = ({
   return (
     <div className="border border-slate-700 bg-slate-800/30 rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Restricted Custom Edit</h3>
+        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Precision Retouching</h3>
         <span className="text-[10px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full border border-slate-600">Strict Constraints Active</span>
       </div>
       

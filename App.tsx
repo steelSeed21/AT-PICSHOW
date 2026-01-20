@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { AppMode, PoseCategory, PoseVariant, AttireType, IdentityConfigState } from './types';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { AppMode, PoseCategory, PoseVariant, AttireType, IdentityConfigState, WorkflowState } from './types';
 import { DEFAULT_TIPS } from './constants';
 import { Button } from './components/Button';
 import { ImageUpload } from './components/ImageUpload';
@@ -34,6 +34,10 @@ const App: React.FC = () => {
   const [selectedEnhancement, setSelectedEnhancement] = useState<string | null>(null);
   const [editPrompt, setEditPrompt] = useState('');
 
+  // Cache for Analysis Results (File Name -> Analysis Result)
+  // Implements "Analyze Once, Enhance Many"
+  const analysisCache = useRef<Map<string, any>>(new Map());
+
   // API Key Check on Mount
   const [envCheckFailed, setEnvCheckFailed] = useState(false);
   useEffect(() => {
@@ -48,12 +52,18 @@ const App: React.FC = () => {
   const analysisResult = currentItem?.analysis || null;
   const dynamicTips = currentItem?.tips || DEFAULT_TIPS;
 
-  // Granular Status Message
+  // Granular Status Message based on Workflow State
   const processingStatus = useMemo(() => {
-    if (processor.processingState.isAnalyzing) return "Analyzing Visual Content...";
-    if (processor.processingState.isGenerating) return "Generating Identity...";
-    if (processor.processingState.isEnhancing) return "Enhancing Aesthetics...";
-    if (processor.processingState.isEditing) return "Applying Custom Edits...";
+    const { workflowState, activeOperation } = processor.processingState;
+    if (workflowState === WorkflowState.PROCESSING) {
+        switch (activeOperation) {
+            case 'ANALYZING': return "Analyzing Visual Content...";
+            case 'GENERATING': return "Generating Identity Variant...";
+            case 'ENHANCING': return "Enhancing Aesthetics...";
+            case 'EDITING': return "Applying Custom Edits...";
+            default: return "Processing...";
+        }
+    }
     return null;
   }, [processor.processingState]);
 
@@ -67,6 +77,8 @@ const App: React.FC = () => {
   const handleModeChange = (newMode: AppMode) => {
     if (processor.isBusy) return;
     setMode(newMode);
+    // Note: We do NOT reset history entirely here to preserve the source image if possible, 
+    // but the prompt implies strict separation. Let's reset for safety.
     historyMgr.resetHistory();
     processor.clearError();
     setEmployeePrompt('');
@@ -80,13 +92,28 @@ const App: React.FC = () => {
   };
 
   const runAnalysis = async (file: File, itemId: string) => {
+    // Check Cache First
+    const cacheKey = `${file.name}-${file.size}-${mode}`;
+    if (analysisCache.current.has(cacheKey)) {
+        console.log("Analysis cache hit");
+        const cachedResult = analysisCache.current.get(cacheKey);
+        historyMgr.updateHistoryItem(itemId, {
+            analysis: cachedResult,
+            tips: cachedResult.quick_edit_suggestions?.length > 0 ? cachedResult.quick_edit_suggestions : DEFAULT_TIPS
+        });
+        return;
+    }
+
     const context = mode === AppMode.OFFER_BOOSTER 
-        ? "Travel & Hospitality Marketing Asset (Hotel, Resort, Food, Market, or Landscape)" 
-        : "Employee Identity Standardization (Identity Builder)";
+        ? "TRAVEL_MARKETING" 
+        : "IDENTITY_STANDARDIZATION";
 
     const result = await processor.processAnalysis(file, context);
     
     if (result) {
+        // Cache the result
+        analysisCache.current.set(cacheKey, result);
+
         historyMgr.updateHistoryItem(itemId, {
             analysis: result,
             tips: result.quick_edit_suggestions?.length > 0 ? result.quick_edit_suggestions : DEFAULT_TIPS
@@ -108,9 +135,13 @@ const App: React.FC = () => {
         const res = await fetch(base64Image);
         const blob = await res.blob();
         const file = new File([blob], `${source}_${Date.now()}.png`, { type: "image/png" });
-        const newItemId = historyMgr.addToHistory(file);
+        const newItemId = historyMgr.addToHistory(file, undefined, 'GENERATED');
         
-        // Auto-analyze new result to keep context fresh
+        // IMPORTANT: For generated images, we might NOT want to re-analyze fully immediately 
+        // to save tokens, OR we do it to suggest next steps.
+        // Rule: "Analyze once, enhance many".
+        // However, a generated image is a NEW asset. 
+        // We will perform analysis to update the feedback loop (Visual Suggestions).
         await runAnalysis(file, newItemId);
     } catch (e) {
         console.error("Failed to process generated image blob", e);
@@ -118,6 +149,7 @@ const App: React.FC = () => {
   };
 
   const handleGenerateEmployee = async () => {
+    // Identity Builder: Source Image is the Reference
     const referenceImage = historyMgr.history.length > 0 ? historyMgr.history[0].file : null;
     if (!referenceImage) return;
 
@@ -152,6 +184,27 @@ const App: React.FC = () => {
         await handleGeneratedImage(base64, "edited");
         setEditPrompt('');
     }
+  };
+
+  const handleResetToOriginal = () => {
+    if (historyMgr.history.length > 0) {
+        const originalFile = historyMgr.history[0].file;
+        historyMgr.resetHistory();
+        
+        // Re-add original and re-attach cached analysis if available
+        const newItemId = historyMgr.addToHistory(originalFile);
+        
+        const cacheKey = `${originalFile.name}-${originalFile.size}-${mode}`;
+        if (analysisCache.current.has(cacheKey)) {
+            const cachedResult = analysisCache.current.get(cacheKey);
+            historyMgr.updateHistoryItem(newItemId, {
+                analysis: cachedResult,
+                tips: cachedResult.quick_edit_suggestions || DEFAULT_TIPS
+            });
+        }
+    }
+    setEditPrompt('');
+    setSelectedEnhancement(null);
   };
 
   // Critical Error State
@@ -202,11 +255,11 @@ const App: React.FC = () => {
                     <Button 
                         onClick={handleGenerateEmployee} 
                         disabled={processor.isBusy || !selectedFile}
-                        isLoading={processor.processingState.isGenerating}
+                        isLoading={processor.processingState.activeOperation === 'GENERATING'}
                         size="md"
                         className={`min-w-[140px] shadow-indigo-500/20 ${!selectedFile ? 'opacity-50' : ''}`}
                     >
-                        {processor.processingState.isGenerating ? 'Processing...' : 'Generate'}
+                        {processor.processingState.activeOperation === 'GENERATING' ? 'Generating...' : 'Generate'}
                     </Button>
                 </div>
             )}
@@ -223,14 +276,14 @@ const App: React.FC = () => {
                />
             </Card>
 
-            {/* Identity Configuration - UNLOCKED (Always visible/interactive unless processing) */}
+            {/* Identity Configuration */}
             {mode === AppMode.IDENTITY_BUILDER && (
                 <>
                     <IdentityConfiguration 
                         config={identityConfig}
                         onConfigChange={(updates) => setIdentityConfig(prev => ({ ...prev, ...updates }))}
                         isLoading={processor.isBusy}
-                        disabled={processor.isBusy} // Only disable if actively processing
+                        disabled={processor.isBusy} 
                     />
                     <div className={`transition-opacity duration-300 ${processor.isBusy ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                       <Card className="border-indigo-500/10 bg-indigo-900/5">
@@ -251,7 +304,7 @@ const App: React.FC = () => {
                 </>
             )}
 
-            {/* Offer Booster Panel - SIDEBAR (Quick Actions only) - ALWAYS VISIBLE */}
+            {/* Offer Booster Panel */}
             {mode === AppMode.OFFER_BOOSTER && (
                <OfferBoosterPanel
                   selectedFile={selectedFile}
@@ -260,6 +313,8 @@ const App: React.FC = () => {
                   onEnhance={handleEnhancement}
                   isLoading={processor.isBusy}
                   recommendedPresets={recommendedPresets}
+                  onReset={handleResetToOriginal}
+                  hasHistory={historyMgr.history.length > 1}
                />
             )}
 
@@ -285,6 +340,7 @@ const App: React.FC = () => {
                   selectedFile={selectedFile}
                   processingStatus={processingStatus}
                   tips={dynamicTips}
+                  workflowState={processor.processingState.workflowState}
               />
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { VisualAnalysisResult, AppMode } from '../types';
+import { VisualAnalysisResult, AppMode, WorkflowState } from '../types';
 import { AnalysisResultView } from './AnalysisResultView';
 import { CustomEditPanel } from './CustomEditPanel';
 
@@ -20,6 +20,7 @@ interface ImagePreviewProps {
   selectedFile: File | null;
   processingStatus: string | null;
   tips: string[];
+  workflowState?: WorkflowState;
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -38,7 +39,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   onApplyCustomEdit,
   selectedFile,
   processingStatus,
-  tips
+  tips,
+  workflowState
 }) => {
   
   const isLoading = !!processingStatus;
@@ -83,6 +85,26 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
     );
   }
 
+  // Determine Badge Text & Color based on WorkflowState or Compare Mode
+  let badgeText = "SOURCE INPUT";
+  let badgeColor = "bg-black/70";
+
+  if (isComparing) {
+      badgeText = "ORIGINAL SOURCE";
+      badgeColor = "bg-amber-600/90";
+  } else if (isLoading) {
+      badgeText = "PROCESSING...";
+      badgeColor = "bg-indigo-600/50 animate-pulse";
+  } else if (workflowState === WorkflowState.RESULT_READY) {
+      if (mode === AppMode.IDENTITY_BUILDER) {
+          badgeText = "GENERATED IDENTITY";
+          badgeColor = "bg-indigo-600/90";
+      } else {
+          badgeText = canUndo ? "ENHANCED RESULT" : "ANALYZED SOURCE";
+          badgeColor = canUndo ? "bg-emerald-600/90" : "bg-black/70";
+      }
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-2xl">
@@ -96,10 +118,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
         
         {/* Status Badge */}
         <div className="absolute top-4 left-4 z-10 pointer-events-none">
-          <span className={`backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/10 shadow-xl ${
-              isComparing ? 'bg-amber-600/90' : (mode === AppMode.IDENTITY_BUILDER && !analysisResult ? 'bg-indigo-600/90' : 'bg-black/70')
-          }`}>
-            {isComparing ? 'ORIGINAL SOURCE' : (mode === AppMode.IDENTITY_BUILDER && !analysisResult ? 'GENERATED IDENTITY' : (canUndo ? 'ENHANCED RESULT' : 'SOURCE INPUT'))}
+          <span className={`backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/10 shadow-xl ${badgeColor}`}>
+            {badgeText}
           </span>
         </div>
 

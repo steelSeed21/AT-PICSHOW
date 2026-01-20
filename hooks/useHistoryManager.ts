@@ -31,7 +31,7 @@ export const useHistoryManager = () => {
     return () => cleanupItems(historyRef.current);
   }, [cleanupItems]);
 
-  const addToHistory = useCallback((file: File, url?: string) => {
+  const addToHistory = useCallback((file: File, url?: string, sourceType: 'ORIGINAL' | 'GENERATED' = 'ORIGINAL') => {
     const objectUrl = url || URL.createObjectURL(file);
     
     const newItem: HistoryItem = {
@@ -40,7 +40,8 @@ export const useHistoryManager = () => {
       url: objectUrl,
       analysis: null,
       tips: DEFAULT_TIPS,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      sourceType
     };
 
     setHistory(prev => {

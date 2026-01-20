@@ -31,6 +31,35 @@ const getAIClient = () => {
 };
 
 // ============================================================================
+// RETRY LOGIC (Backoff)
+// ============================================================================
+
+const MAX_RETRIES = 3;
+const INITIAL_BACKOFF_MS = 2000;
+
+async function withRetry<T>(operation: () => Promise<T>, retryCount = 0): Promise<T> {
+  try {
+    return await operation();
+  } catch (error: any) {
+    const isRateLimit = 
+      error.status === 429 || 
+      error.code === 429 || 
+      (error.message && error.message.includes('RESOURCE_EXHAUSTED')) ||
+      (error.message && error.message.includes('429'));
+
+    if (isRateLimit && retryCount < MAX_RETRIES) {
+      const delay = INITIAL_BACKOFF_MS * Math.pow(2, retryCount);
+      console.warn(`Gemini API Rate Limit (429). Retrying in ${delay}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return withRetry(operation, retryCount + 1);
+    }
+
+    throw error;
+  }
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -88,19 +117,47 @@ const fileToGenerativePart = async (file: File): Promise<Part> => {
     };
   };
 
+/**
+ * AI GUARDRAIL: Soft Prompt Rewriter
+ * Prevents identity theft/alteration and enforces physics without hard rejection.
+ */
+const guardrailPrompt = (userPrompt: string, mode: 'EDIT' | 'GENERATE'): string => {
+    let safePrompt = userPrompt;
+    const lowerPrompt = userPrompt.toLowerCase();
+
+    // 1. Identity Protection Guardrail
+    const forbiddenIdentityTerms = ['change face', 'different person', 'younger', 'older', 'celebrity', 'change race', 'skin color'];
+    if (forbiddenIdentityTerms.some(term => lowerPrompt.includes(term))) {
+        console.warn("AI Guardrail triggered: Identity preservation enforced.");
+        safePrompt += " (STRICT CONSTRAINT: DO NOT CHANGE IDENTITY. Maintain exact facial features, age, and ethnicity of the source reference.)";
+    }
+
+    // 2. Physics/Material Guardrail (for Edits)
+    if (mode === 'EDIT') {
+        safePrompt += " (STRICT CONSTRAINT: Maintain photorealistic lighting and material physics. No cartoonish or flat 2D effects.)";
+    }
+
+    return safePrompt;
+};
+
 // ============================================================================
 // ANALYZE IMAGE
 // ============================================================================
 
 export async function analyzeImage(
   imageFile: File,
-  context: string
+  context: 'TRAVEL_MARKETING' | 'IDENTITY_STANDARDIZATION'
 ): Promise<VisualAnalysisResult> {
   const ai = getAIClient();
   const imagePart = await fileToGenerativePart(imageFile);
-  const prompt = ANALYSIS_PROMPT_TEMPLATE(context);
+  
+  const specificContext = context === 'TRAVEL_MARKETING' 
+    ? "Travel & Hospitality Marketing (Hotel, Food, Landscape)" 
+    : "Corporate Identity Standardization (Employee Headshots)";
+    
+  const prompt = ANALYSIS_PROMPT_TEMPLATE(specificContext);
 
-  try {
+  return withRetry(async () => {
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: {
@@ -129,11 +186,7 @@ export async function analyzeImage(
                    json.detected_attributes.is_opened === "false" ? false : "unknown"
       }
     } as VisualAnalysisResult;
-
-  } catch (error) {
-    console.error("Gemini Analysis Error:", error);
-    throw error;
-  }
+  });
 }
 
 // ============================================================================
@@ -160,11 +213,14 @@ export async function generateEmployeeImage(
   
   const logoPlacement = ATTIRE_LOGO_MAPPING[attire];
 
-  // Determine effective prompt
+  // Determine effective prompt with Guardrails
   let effectivePrompt = prompt;
   if (!effectivePrompt || effectivePrompt.trim() === '') {
      effectivePrompt = "The exact person depicted in the reference image, maintaining their exact grooming and features.";
   }
+  
+  // Apply Guardrails (Soft Rewrite)
+  effectivePrompt = guardrailPrompt(effectivePrompt, 'GENERATE');
   
   // 1. Build Base Prompt
   let fullPrompt = buildFullIdentityPrompt(effectivePrompt, pose, attire);
@@ -186,7 +242,7 @@ export async function generateEmployeeImage(
 
   parts.push({ text: fullPrompt });
 
-  try {
+  return withRetry(async () => {
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: { parts },
@@ -194,10 +250,7 @@ export async function generateEmployeeImage(
     });
 
     return extractImageFromResponse(response);
-  } catch (error) {
-    console.error("Gemini Generation Error:", error);
-    throw error;
-  }
+  });
 }
 
 // ============================================================================
@@ -210,11 +263,8 @@ export type EnhancementType =
   | 'culinary_pop' 
   | 'ecommerce_hero'
   | 'golden_hour' 
-  | 'modern_bright' 
   | 'vibrant_tropical' 
-  | 'nordic_soft' 
-  | 'cinematic_drama' 
-  | 'blue_hour';
+  | 'nordic_soft';
 
 export async function enhanceImage(
   imageFile: File,
@@ -228,7 +278,7 @@ export async function enhanceImage(
       throw new Error(`Enhancement preset '${enhancement}' not found.`);
   }
 
-  try {
+  return withRetry(async () => {
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: {
@@ -238,10 +288,7 @@ export async function enhanceImage(
     });
 
     return extractImageFromResponse(response);
-  } catch (error) {
-    console.error("Gemini Enhancement Error:", error);
-    throw error;
-  }
+  });
 }
 
 // ============================================================================
@@ -251,9 +298,12 @@ export async function enhanceImage(
 export const editImage = async (file: File, prompt: string): Promise<string> => {
   const ai = getAIClient();
   const imagePart = await fileToGenerativePart(file);
-  const promptText = EDIT_STRICT_CONSTRAINT_PROMPT(prompt);
+  
+  // Apply Guardrails
+  const safePrompt = guardrailPrompt(prompt, 'EDIT');
+  const promptText = EDIT_STRICT_CONSTRAINT_PROMPT(safePrompt);
 
-  try {
+  return withRetry(async () => {
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: {
@@ -263,10 +313,7 @@ export const editImage = async (file: File, prompt: string): Promise<string> => 
     });
 
     return extractImageFromResponse(response);
-  } catch (error) {
-    console.error("Gemini Edit Error:", error);
-    throw error;
-  }
+  });
 };
 
 // Helper to safely extract image

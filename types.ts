@@ -5,6 +5,14 @@ export enum AppMode {
   IDENTITY_BUILDER = 'IDENTITY_BUILDER'
 }
 
+export enum WorkflowState {
+  EMPTY = 'EMPTY',
+  SOURCE_READY = 'SOURCE_READY',
+  PROCESSING = 'PROCESSING',
+  RESULT_READY = 'RESULT_READY',
+  ERROR = 'ERROR'
+}
+
 // ============================================================================
 // APP STATE TYPES
 // ============================================================================
@@ -16,13 +24,13 @@ export interface HistoryItem {
   analysis: VisualAnalysisResult | null;
   tips: string[];
   timestamp: number;
+  sourceType: 'ORIGINAL' | 'GENERATED';
 }
 
+// Replaces scattered booleans with a cohesive state object
 export interface ProcessingState {
-  isAnalyzing: boolean;
-  isGenerating: boolean;
-  isEnhancing: boolean;
-  isEditing: boolean;
+  workflowState: WorkflowState;
+  activeOperation: 'ANALYZING' | 'GENERATING' | 'ENHANCING' | 'EDITING' | null;
 }
 
 // ============================================================================
@@ -120,14 +128,18 @@ export interface VisualSuggestion {
   type: string;
   description: string;
   risk_level: "LOW" | "MEDIUM" | "HIGH";
+  confidence_score: number; // 0.0 to 1.0
 }
 
 export interface VisualAnalysisResult {
+  domain: "TRAVEL_MARKETING" | "IDENTITY_STANDARDIZATION";
   analysis: string;
+  // Identity Builder Specifics
   pose_preset?: string | null;
   clothing_type?: string | null;
   brand_application?: "ENAMEL_PIN" | "WOVEN_PATCH" | "DIRECT_PRINT" | null;
   logo_placement?: string | null;
+  // Common
   detected_attributes: DetectedAttributes;
   visual_suggestions: VisualSuggestion[];
   quick_edit_suggestions: string[];
@@ -138,6 +150,7 @@ export interface VisualAnalysisResult {
 export const AnalysisSchema: Schema = {
   type: Type.OBJECT,
   properties: {
+    domain: { type: Type.STRING, enum: ["TRAVEL_MARKETING", "IDENTITY_STANDARDIZATION"] },
     analysis: { type: Type.STRING },
     pose_preset: { type: Type.STRING, nullable: true },
     clothing_type: { type: Type.STRING, nullable: true },
@@ -161,9 +174,10 @@ export const AnalysisSchema: Schema = {
         properties: {
           type: { type: Type.STRING },
           description: { type: Type.STRING },
-          risk_level: { type: Type.STRING, enum: ["LOW", "MEDIUM", "HIGH"] }
+          risk_level: { type: Type.STRING, enum: ["LOW", "MEDIUM", "HIGH"] },
+          confidence_score: { type: Type.NUMBER, description: "Float between 0.0 and 1.0 indicating AI certainty" }
         },
-        required: ["type", "description", "risk_level"]
+        required: ["type", "description", "risk_level", "confidence_score"]
       }
     },
     quick_edit_suggestions: {
@@ -173,5 +187,5 @@ export const AnalysisSchema: Schema = {
     },
     constraints_respected: { type: Type.BOOLEAN }
   },
-  required: ["analysis", "detected_attributes", "visual_suggestions", "quick_edit_suggestions", "constraints_respected"]
+  required: ["domain", "analysis", "detected_attributes", "visual_suggestions", "quick_edit_suggestions", "constraints_respected"]
 };
